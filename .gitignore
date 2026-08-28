@@ -133,3 +133,9 @@ rad.json
 #Test results file
 TestResults.xml
 >>>>>>> b2c0247eecb5142059df2b4971b48e1ebe716b40
+.next/
+node_modules/
+.env
+.env.local
+dist/
+build/
