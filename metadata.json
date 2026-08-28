@@ -1,0 +1,6 @@
+{
+  "name": "Dani & Miki Auto Solution",
+  "description": "High-end cinematic automotive website with interactive diagnostic tools, multi-step booking, and service showcase.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

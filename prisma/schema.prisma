@@ -1,0 +1,271 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Admin {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Booking {
+  id                  String   @id @default(uuid())
+  internalId          Int      @unique @default(autoincrement()) // For internal reference before approval
+  bookingCode         String?  @unique // DM-XXXX-XXXX generated after approval
+  
+  // Customer Info
+  customerName        String
+  customerPhone       String
+  customerEmail       String
+  
+  // Vehicle Info (Optional)
+  vehicleMake         String?
+  vehicleModel        String?
+  vehicleYear         String?
+  plateNumber         String?
+  notes               String?
+  
+  // Service / Package
+  packageId           String
+  package             Package  @relation(fields: [packageId], references: [id])
+  
+  // Schedule
+  date                String   // Format: YYYY-MM-DD
+  time                String   // Format: HH:mm
+  
+  // Payment
+  depositAmount       Float
+  depositMethod       String   // e.g., "telebirr", "cbe"
+  transactionRef      String
+  paymentScreenshot   String   // Supabase storage path
+  
+  // Status
+  status              BookingStatus @default(PENDING_VERIFICATION)
+  rejectionReason     String?
+  
+  // Timestamps
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  approvedAt          DateTime?
+  checkedInAt         DateTime?
+  completedAt         DateTime?
+
+  @@index([date, time, status])
+}
+
+enum BookingStatus {
+  PENDING_VERIFICATION
+  APPROVED
+  REJECTED
+  CHECKED_IN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Package {
+  id          String    @id @default(uuid())
+  name        String
+  description String
+  price       Float?
+  deposit     Float?    // Optional override for the global default deposit
+  duration    Int       // in minutes
+  isActive    Boolean   @default(true)
+  imageUrl    String?   // Supabase storage path
+  features    String[]  // Array of feature strings
+  
+  bookings    Booking[]
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Mechanic {
+  id             String    @id @default(uuid())
+  name           String
+  role           String
+  specialization String
+  experience     String
+  certifications String[]
+  bio            String
+  photo          String?   // Supabase storage path
+  isActive       Boolean   @default(true)
+  
+  reviews        Review[]
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  customer    String
+  email       String?
+  phone       String?
+  rating      Int
+  reviewText  String
+  isPinned    Boolean  @default(false)
+  status      ReviewStatus @default(PENDING)
+  
+  mechanicId  String
+  mechanic    Mechanic @relation(fields: [mechanicId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String?
+  email     String
+  message   String
+  isRead    Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BankAccount {
+  id            String   @id @default(uuid())
+  bankName      String
+  bankIcon      String?  // Supabase storage path or icon identifier
+  accountName   String
+  accountNumber String
+  isActive      Boolean  @default(true)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model BusinessHour {
+  id        String   @id @default(uuid())
+  dayOfWeek Int      @unique // 0 = Sunday, 1 = Monday, etc.
+  openTime  String   // HH:mm
+  closeTime String   // HH:mm
+  isClosed  Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BreakHour {
+  id        String   @id @default(uuid())
+  name      String   // e.g., "Lunch Break"
+  startTime String   // HH:mm
+  endTime   String   // HH:mm
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BlockedDate {
+  id        String   @id @default(uuid())
+  date      String   // YYYY-MM-DD
+  reason    String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BlockedTime {
+  id        String   @id @default(uuid())
+  date      String   // YYYY-MM-DD
+  startTime String   // HH:mm
+  endTime   String   // HH:mm
+  reason    String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InPersonBooking {
+  id        String   @id @default(uuid())
+  date      String   // YYYY-MM-DD
+  startTime String   // HH:mm
+  endTime   String   // HH:mm
+  notes     String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Branch {
+  id        String   @id @default(uuid())
+  name      String
+  address   String
+  phone     String?
+  mapUrl    String?
+  isActive  Boolean  @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FAQ {
+  id        String   @id @default(uuid())
+  question  String
+  answer    String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SocialLink {
+  id        String   @id @default(uuid())
+  platform  String   // e.g., "Facebook", "Instagram"
+  url       String
+  icon      String?
+  isActive  Boolean  @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SiteSetting {
+  id            String   @id @default(uuid())
+  key           String   @unique // e.g., "deposit_type", "deposit_amount", "garage_name"
+  value         String
+  description   String?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model WebsiteContent {
+  id          String   @id @default(uuid())
+  section     String   @unique // e.g., "home_hero", "about_us"
+  title       String?
+  subtitle    String?
+  description String?
+  ctaText     String?
+  imageUrl    String?  // Supabase storage path
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
