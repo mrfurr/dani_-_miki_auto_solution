@@ -18,10 +18,10 @@ export async function GET(request: NextRequest) {
     })
 
     // Calculate average rating for each mechanic
-    const mechanicsWithRatings = mechanics.map(mechanic => {
+    const mechanicsWithRatings = mechanics.map((mechanic: any) => {
       const reviews = mechanic.reviews
       const averageRating = reviews.length > 0
-        ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+        ? reviews.reduce((sum: number, review: { rating: number }) => sum + review.rating, 0) / reviews.length
         : 0
 
       return {

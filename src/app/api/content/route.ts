@@ -8,7 +8,7 @@ export async function GET() {
     const rows = await prisma.websiteContent.findMany({
       orderBy: { section: 'asc' }
     })
-    const content = Object.fromEntries(rows.map(r => [r.section, r]))
+    const content = Object.fromEntries(rows.map((r: { section: string }) => [r.section, r]))
     return NextResponse.json({ content })
   } catch (error) {
     console.error('Error fetching public content:', error)

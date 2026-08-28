@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
       const timeString = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`
 
       // Check if this time is during a break
-      const isDuringBreak = breakHours.some((bh) => {
+      const isDuringBreak = breakHours.some((bh: { startTime: string; endTime: string }) => {
         const [bsH, bsM] = bh.startTime.split(':').map(Number)
         const [beH, beM] = bh.endTime.split(':').map(Number)
         const cur = currentHour * 60 + currentMinute
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
       })
 
       // Check if this time is blocked
-      const isBlocked = blockedTimes.some((bt) => {
+      const isBlocked = blockedTimes.some((bt: { startTime: string; endTime: string }) => {
         const [bsH, bsM] = bt.startTime.split(':').map(Number)
         const [beH, beM] = bt.endTime.split(':').map(Number)
         const cur = currentHour * 60 + currentMinute
@@ -102,8 +102,8 @@ export async function GET(request: NextRequest) {
 
       // Check if this time is booked (online or in-person)
       const isBooked =
-        existingBookings.some((b) => b.time === timeString) ||
-        inPersonBookings.some((ip) => {
+        existingBookings.some((b: { time: string }) => b.time === timeString) ||
+        inPersonBookings.some((ip: { startTime: string; endTime: string }) => {
           const [bsH, bsM] = ip.startTime.split(':').map(Number)
           const [beH, beM] = ip.endTime.split(':').map(Number)
           const cur = currentHour * 60 + currentMinute

@@ -30,7 +30,7 @@ export async function GET() {
     const result = mechanics.map(m => ({
       ...m,
       avgRating: m.reviews.length > 0
-        ? m.reviews.reduce((s, r) => s + r.rating, 0) / m.reviews.length
+        ? m.reviews.reduce((s: number, r: { rating: number }) => s + r.rating, 0) / m.reviews.length
         : 0,
       reviewCount: m.reviews.length
     }))

@@ -8,7 +8,7 @@ const PUBLIC_KEYS = ['garage_name', 'garage_tagline', 'logo_url', 'deposit_type'
 export async function GET() {
   try {
     const rows = await prisma.siteSetting.findMany({ where: { key: { in: PUBLIC_KEYS } } })
-    const settings = Object.fromEntries(rows.map(r => [r.key, r.value]))
+    const settings = Object.fromEntries(rows.map((r: { key: string; value: string }) => [r.key, r.value]))
     return NextResponse.json({ settings })
   } catch (error) {
     console.error('Error fetching public settings:', error)
