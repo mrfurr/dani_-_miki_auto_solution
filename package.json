@@ -1,8 +1,20 @@
 {
-  "name": "react-example",
+  "name": "dmautosolution",
+  "version": "0.0.1",
   "private": true,
-  "version": "0.0.0",
+  "description": "Dani & Miki Auto Solutions",
+  "homepage": "https://github.com/mrfurr/D-M-Auto-Solution#readme",
+  "bugs": {
+    "url": "https://github.com/mrfurr/D-M-Auto-Solution/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mrfurr/D-M-Auto-Solution.git"
+  },
+  "license": "MIT",
+  "author": "MR. FURR",
   "type": "module",
+  "main": "emailtest.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
