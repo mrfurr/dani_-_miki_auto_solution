@@ -1,28 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// GET /api/availability?date=YYYY-MM-DD - Get available time slots for a specific date
+// A slot range from the new format
+interface SlotRange {
+  start: string  // HH:mm
+  end:   string  // HH:mm
+  label: string  // "8:30 AM – 10:30 AM"
+}
+
+const toMins = (hhmm: string) => {
+  const [h, m] = hhmm.split(':').map(Number)
+  return h * 60 + m
+}
+
+// GET /api/availability?date=YYYY-MM-DD&branchId=xxx
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const date = searchParams.get('date')
+    const date     = searchParams.get('date')
+    const branchId = searchParams.get('branchId') || null
 
     if (!date) {
-      return NextResponse.json(
-        { error: 'Date parameter is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Date parameter is required' }, { status: 400 })
     }
 
-    // Parse the date
     const requestedDate = new Date(date)
-    const dayOfWeek = requestedDate.getDay() // 0 = Sunday, 1 = Monday, etc.
+    const dayOfWeek = requestedDate.getDay()
 
-    // Check if the date is blocked
-    const blockedDate = await prisma.blockedDate.findFirst({
-      where: { date }
-    })
-
+    // Blocked date?
+    const blockedDate = await prisma.blockedDate.findFirst({ where: { date } })
     if (blockedDate) {
       return NextResponse.json({
         available: false,
@@ -31,11 +37,8 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Get business hours for this day
-    const businessHour = await prisma.businessHour.findFirst({
-      where: { dayOfWeek }
-    })
-
+    // Business hours for this day
+    const businessHour = await prisma.businessHour.findFirst({ where: { dayOfWeek } })
     if (!businessHour || businessHour.isClosed) {
       return NextResponse.json({
         available: false,
@@ -44,87 +47,69 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Get break hours
-    const breakHours = await prisma.breakHour.findMany()
+    const openMins  = toMins(businessHour.openTime)
+    const closeMins = toMins(businessHour.closeTime)
 
-    // Get blocked times for this date
-    const blockedTimes = await prisma.blockedTime.findMany({
-      where: { date }
-    })
+    // Get blocked times and in-person bookings for this date
+    const [blockedTimes, inPersonBookings, existingBookings, timeClassifications] = await Promise.all([
+      prisma.blockedTime.findMany({ where: { date } }),
+      prisma.inPersonBooking.findMany({ where: { date } }),
+      prisma.booking.findMany({
+        where: {
+          date,
+          status: { in: ['APPROVED', 'CHECKED_IN', 'IN_PROGRESS'] },
+          // scope to branch — null branchId means no filter (single-branch setup)
+          ...(branchId ? { branchId } : {})
+        },
+        select: { time: true }
+      }),
+      prisma.timeClassification.findMany({ where: { isActive: true }, orderBy: { order: 'asc' } })
+    ])
 
-    // Get in-person bookings for this date
-    const inPersonBookings = await prisma.inPersonBooking.findMany({
-      where: { date }
-    })
+    // Build the available slot list from classification ranges
+    const timeSlots: Array<{ label: string; start: string; end: string; groupLabel: string }> = []
 
-    // Get existing online bookings for this date
-    const existingBookings = await prisma.booking.findMany({
-      where: {
-        date,
-        status: {
-          in: ['PENDING_VERIFICATION', 'APPROVED', 'CHECKED_IN', 'IN_PROGRESS']
-        }
-      },
-      select: { time: true }
-    })
+    for (const tc of timeClassifications) {
+      let ranges: SlotRange[]
+      try { ranges = JSON.parse(tc.ranges) } catch { continue }
 
-    // Generate time slots based on business hours
-    const [openHour, openMinute] = businessHour.openTime.split(':').map(Number)
-    const [closeHour, closeMinute] = businessHour.closeTime.split(':').map(Number)
+      for (const range of ranges) {
+        const slotStart = toMins(range.start)
+        const slotEnd   = toMins(range.end)
 
-    const timeSlots: string[] = []
-    let currentHour = openHour
-    let currentMinute = openMinute
+        // Must fall within business hours
+        if (slotStart < openMins || slotEnd > closeMins) continue
 
-    // Generate slots every 90 minutes
-    while (currentHour < closeHour || (currentHour === closeHour && currentMinute < closeMinute)) {
-      const timeString = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`
-
-      // Check if this time is during a break
-      const isDuringBreak = breakHours.some((bh: { startTime: string; endTime: string }) => {
-        const [bsH, bsM] = bh.startTime.split(':').map(Number)
-        const [beH, beM] = bh.endTime.split(':').map(Number)
-        const cur = currentHour * 60 + currentMinute
-        const bStart = bsH * 60 + bsM
-        const bEnd = beH * 60 + beM
-        return cur >= bStart && cur < bEnd
-      })
-
-      // Check if this time is blocked
-      const isBlocked = blockedTimes.some((bt: { startTime: string; endTime: string }) => {
-        const [bsH, bsM] = bt.startTime.split(':').map(Number)
-        const [beH, beM] = bt.endTime.split(':').map(Number)
-        const cur = currentHour * 60 + currentMinute
-        const bStart = bsH * 60 + bsM
-        const bEnd = beH * 60 + beM
-        return cur >= bStart && cur < bEnd
-      })
-
-      // Check if this time is booked (online or in-person)
-      const isBooked =
-        existingBookings.some((b: { time: string }) => b.time === timeString) ||
-        inPersonBookings.some((ip: { startTime: string; endTime: string }) => {
-          const [bsH, bsM] = ip.startTime.split(':').map(Number)
-          const [beH, beM] = ip.endTime.split(':').map(Number)
-          const cur = currentHour * 60 + currentMinute
-          const bStart = bsH * 60 + bsM
-          const bEnd = beH * 60 + beM
-          return cur >= bStart && cur < bEnd
+        // Check if slot overlaps with a blocked time
+        const isBlocked = blockedTimes.some(bt => {
+          const bStart = toMins(bt.startTime)
+          const bEnd   = toMins(bt.endTime)
+          return slotStart < bEnd && slotEnd > bStart
         })
+        if (isBlocked) continue
 
-      // Add slot if available
-      if (!isDuringBreak && !isBlocked && !isBooked) {
-        const displayHour = currentHour % 12 || 12
-        const ampm = currentHour >= 12 ? 'PM' : 'AM'
-        const displayTime = `${String(displayHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')} ${ampm}`
-        timeSlots.push(displayTime)
-      }
+        // Check if slot overlaps with an in-person booking
+        const isInPerson = inPersonBookings.some(ip => {
+          const iStart = toMins(ip.startTime)
+          const iEnd   = toMins(ip.endTime)
+          return slotStart < iEnd && slotEnd > iStart
+        })
+        if (isInPerson) continue
 
-      // Increment by 90 minutes
-      currentMinute += 90
-      if (currentMinute >= 60) {
-        currentHour += Math.floor(currentMinute / 60)
-        currentMinute = currentMinute % 60
+        // Count bookings for the whole group and compare against limit
+        const groupRanges: SlotRange[] = JSON.parse(tc.ranges)
+        const groupStartTimes = groupRanges.map(r => r.start)
+        const bookingsInGroup = existingBookings.filter(b => groupStartTimes.includes(b.time)).length
+
+        // Slot unavailable only when the group's booking limit is reached
+        if (bookingsInGroup >= tc.bookingLimit) continue
+
+        timeSlots.push({
+          label:      range.label,
+          start:      range.start,
+          end:        range.end,
+          groupLabel: tc.label
+        })
       }
     }
 
@@ -132,17 +117,12 @@ export async function GET(request: NextRequest) {
       available: true,
       date,
       dayOfWeek,
-      businessHours: {
-        open: businessHour.openTime,
-        close: businessHour.closeTime
-      },
+      businessHours: { open: businessHour.openTime, close: businessHour.closeTime },
       timeSlots
     })
+
   } catch (error) {
     console.error('Error checking availability:', error)
-    return NextResponse.json(
-      { error: 'Failed to check availability' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to check availability' }, { status: 500 })
   }
 }

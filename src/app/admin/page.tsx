@@ -8,11 +8,20 @@ import {
   TrendingUp, DollarSign, ArrowRight, Activity, Zap, Shield,
   AlertCircle, BarChart2
 } from 'lucide-react'
-import {
-  ResponsiveContainer, AreaChart, Area, XAxis, YAxis,
-  CartesianGrid, Tooltip, PieChart, Pie, Cell
-} from 'recharts'
+import dynamic from 'next/dynamic'
 import { PageHeader, StatCard, Card, Badge, Spinner, bookingStatusBadge } from '@/components/admin/AdminUI'
+
+// Lazy-load recharts — prevents it from blocking admin bundle compilation
+const ResponsiveContainer = dynamic(() => import('recharts').then(m => ({ default: m.ResponsiveContainer })), { ssr: false })
+const AreaChart           = dynamic(() => import('recharts').then(m => ({ default: m.AreaChart })),           { ssr: false })
+const Area                = dynamic(() => import('recharts').then(m => ({ default: m.Area })),                { ssr: false })
+const XAxis               = dynamic(() => import('recharts').then(m => ({ default: m.XAxis })),               { ssr: false })
+const YAxis               = dynamic(() => import('recharts').then(m => ({ default: m.YAxis })),               { ssr: false })
+const CartesianGrid       = dynamic(() => import('recharts').then(m => ({ default: m.CartesianGrid })),       { ssr: false })
+const Tooltip             = dynamic(() => import('recharts').then(m => ({ default: m.Tooltip })),             { ssr: false })
+const PieChart            = dynamic(() => import('recharts').then(m => ({ default: m.PieChart })),            { ssr: false })
+const Pie                 = dynamic(() => import('recharts').then(m => ({ default: m.Pie })),                 { ssr: false })
+const Cell                = dynamic(() => import('recharts').then(m => ({ default: m.Cell })),                { ssr: false })
 
 interface Stats {
   todayBookings: number

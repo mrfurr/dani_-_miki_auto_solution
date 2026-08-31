@@ -22,7 +22,7 @@ export interface Mechanic {
   rating: number;
   experienceYears: number;
   certifications: string[];
-  avatar: string;
+  avatar: string | null;
   bio: string;
   specialties: string[];
   isAvailable: boolean;

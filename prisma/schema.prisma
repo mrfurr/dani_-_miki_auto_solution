@@ -41,6 +41,10 @@ model Booking {
   date                String   // Format: YYYY-MM-DD
   time                String   // Format: HH:mm
   
+  // Branch
+  branchId            String?
+  branch              Branch?  @relation(fields: [branchId], references: [id])
+  
   // Payment
   depositAmount       Float
   depositMethod       String   // e.g., "telebirr", "cbe"
@@ -215,15 +219,17 @@ model InPersonBooking {
 }
 
 model Branch {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   name      String
   address   String
   phone     String?
   mapUrl    String?
-  isActive  Boolean  @default(true)
+  isActive  Boolean   @default(true)
   
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  bookings  Booking[]
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model FAQ {
@@ -269,4 +275,20 @@ model WebsiteContent {
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model TimeClassification {
+  id           String   @id @default(uuid())
+  label        String   // e.g., "Morning", "Afternoon", "Evening"
+  ranges       String   // JSON array of time ranges in minutes: [[510, 630], [635, 720]]
+  description  String   // e.g., "8:30 AM – 10:30 AM, 10:35 AM – 12:00 PM"
+  icon         String?  // Icon identifier
+  color        String?  // e.g., "text-yellow-400"
+  bgColor      String?  // e.g., "bg-yellow-500/10 border-yellow-500/20"
+  order        Int      @default(0)
+  isActive     Boolean  @default(true)
+  bookingLimit Int      @default(5) // Max bookings allowed within this time group per day
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

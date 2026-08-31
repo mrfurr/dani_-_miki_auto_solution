@@ -30,6 +30,7 @@ async function main() {
     await prisma.siteSetting.deleteMany()
     await prisma.websiteContent.deleteMany()
     await prisma.admin.deleteMany()
+    await prisma.timeClassification.deleteMany()
   }
 
   // Create Admin
@@ -407,6 +408,63 @@ async function main() {
 
   // Create Website Content
   console.log('📝 Creating website content...')
+  const servicesShowcaseData = [
+    {
+      id: 'svc-01', numberCode: '01', title: 'Computer Diagnostics',
+      tagline: 'Deep Level Electronic Telemetry & Fault Isolation',
+      description: 'Dealer-level OEM diagnostic scanning across all vehicle control modules. We interrogate engine, transmission, ABS, airbag, body control, and CAN-bus networks to extract real-time live sensor data and hidden trouble codes with pinpoint precision.',
+      features: ['Full CAN-bus network topology scan','Real-time live freeze-frame data logging','Actuator testing & bi-directional component activation','OEM dealer software for BMW, Mercedes, Toyota, VAG, Land Rover'],
+      image: 'https://flojmgyiopjuesgpqpup.supabase.co/storage/v1/object/public/website/defaults/computer_diagnosis.jpeg',
+      turnaround: '45 - 90 Minutes', accuracyRate: '99.8% Fault Pinpoint',
+      equipmentUsed: 'Autel MaxiSys Ultra, Bosch KTS, Launch X431 PAD VII', category: 'Diagnostics',
+    },
+    {
+      id: 'svc-02', numberCode: '02', title: 'ECU Programming',
+      tagline: 'Custom Chip Tuning, Module Flashing & Software Calibration',
+      description: 'Precision flash reprogramming and EEPROM calibration for Engine Control Units (ECU) and Transmission Control Modules (TCU). We perform Stage 1/2 performance tuning, software updates, checksum corrections, and module cloning without hardware damage.',
+      features: ['Stage 1 & Stage 2 custom map development','ECU cloning & bench-mode EEPROM recovery','Speed limiter removal & throttle map sharpening','Transmission TCU shift speed & torque limit optimization'],
+      image: 'https://flojmgyiopjuesgpqpup.supabase.co/storage/v1/object/public/website/defaults/service-ecu.jpg',
+      turnaround: '2 - 4 Hours', accuracyRate: '100% Dyno Verified',
+      equipmentUsed: 'Alientech KESS3, Autotuner, WinOLS 5, CMD Flash', category: 'Performance',
+    },
+    {
+      id: 'svc-03', numberCode: '03', title: 'Automotive Electrical',
+      tagline: 'Complex Harness Diagnostics & Micro-Soldering Repairs',
+      description: 'Comprehensive troubleshooting of complex automotive electrical faults, intermittent parasitic battery drains, burnt wiring looms, alternator/starter systems, sensor failures, and circuit board level repair on immobilizers, BCMs, and fuse blocks.',
+      features: ['Parasitic milliamp battery draw isolation','Oscilloscope waveform analysis on sensors & actuators','Wire harness repair & OEM waterproof pinning','BCM, SAM & fuse box micro-soldering component restoration'],
+      image: 'https://flojmgyiopjuesgpqpup.supabase.co/storage/v1/object/public/website/defaults/automotive_electrical.jpeg',
+      turnaround: 'Same Day / 24 Hours', accuracyRate: '100% Signal Integrity',
+      equipmentUsed: 'PicoScope 4425A 4-Channel Automotive Oscilloscope, Thermal Cam', category: 'Electrical',
+    },
+    {
+      id: 'svc-04', numberCode: '04', title: 'Key Programming',
+      tagline: 'Smart Key Generation, Transponder Cloning & All Keys Lost',
+      description: 'State-of-the-art immobilizer and key programming for modern proximity push-to-start fobs, European encrypted transponders, remote folding keys, and complete emergency key creation when all keys are lost.',
+      features: ['Proximity smart key & push-button fob programming','All-Keys-Lost CAS4/FEM/BDC BMW & FBS4 Mercedes support','Toyota/Lexus H-Chip & G-Chip smart key coding','Keyless-Go & comfort access synchronization'],
+      image: 'https://flojmgyiopjuesgpqpup.supabase.co/storage/v1/object/public/website/defaults/service-keys.jpg',
+      turnaround: '30 - 60 Minutes', accuracyRate: '100% OEM Sync Guarantee',
+      equipmentUsed: 'Autel MaxiIM IM608 Pro II, VVDI Key Tool Plus, OBDSTAR Key Master', category: 'Security',
+    },
+    {
+      id: 'svc-05', numberCode: '05', title: 'DPF Service',
+      tagline: 'Diesel Particulate Filter Regeneration, Cleaning & Calibration',
+      description: 'Restoring clogged diesel particulate filters to 98% factory flow rate. We execute dynamic forced regenerations, pressurized chemical soot dissolution, differential pressure sensor calibrations, and EGR system soot elimination.',
+      features: ['Chemical hydrostatic ultrasonic soot & ash flush','Active computer-forced high-temperature regeneration','Differential pressure sensor re-initialization','EGR valve carbon decoking & reset'],
+      image: 'https://flojmgyiopjuesgpqpup.supabase.co/storage/v1/object/public/website/defaults/service-dpf.jpg',
+      turnaround: '2 - 3 Hours', accuracyRate: '98% Backpressure Reduction',
+      equipmentUsed: 'Pneumatic DPF Flush Rig, OEM Diagnostic Command Tools', category: 'Diesel',
+    },
+    {
+      id: 'svc-06', numberCode: '06', title: 'Vehicle Maintenance',
+      tagline: 'Precision Mechanical Service & Scheduled Inspections',
+      description: 'Meticulous preventative maintenance performed according to manufacturer engineering standards. Premium synthetic lubricants, OEM filtration, timing system checks, brake system bleeding, and comprehensive 50-point diagnostic health validation.',
+      features: ['Full OEM specification synthetic oil & filter change','Brake fluid moisture testing & electronic pressure bleeding','Suspension geometry & bushing torque spec inspection','Multi-point digital inspection report with photo documentation'],
+      image: 'https://flojmgyiopjuesgpqpup.supabase.co/storage/v1/object/public/website/defaults/service-maintenance.jpg',
+      turnaround: '1.5 - 3 Hours', accuracyRate: 'OEM Factory Spec Guarantee',
+      equipmentUsed: 'Snap-on Digital Torque Wrenches, Fluid Analysis Kit', category: 'Mechanical',
+    },
+  ]
+
   await Promise.all([
     prisma.websiteContent.create({
       data: {
@@ -415,7 +473,7 @@ async function main() {
         subtitle: 'Advanced Computer Telemetry & ECU Calibration',
         description: 'Ethiopia\'s premier destination for dealer-level automotive diagnostics, ECU programming, and precision electrical repairs.',
         ctaText: 'Book Appointment',
-        imageUrl: 'https://images.unsplash.com/photo-1613214149922-f1809c99b414?auto=format&fit=crop&w=2000&q=85'
+        imageUrl: 'https://flojmgyiopjuesgpqpup.supabase.co/storage/v1/object/public/website/defaults/dm_wallpaper2.jpg'
       }
     }),
     prisma.websiteContent.create({
@@ -426,7 +484,16 @@ async function main() {
         description: 'Founded by automotive engineering specialists with passion for precision diagnostics and performance optimization.',
         ctaText: 'Learn More'
       }
-    })
+    }),
+    prisma.websiteContent.create({
+      data: {
+        section: 'services_showcase',
+        title: 'CORE SOLUTIONS',
+        subtitle: 'SPECIALIZED WORKSHOP DISCIPLINES',
+        description: JSON.stringify(servicesShowcaseData),
+        ctaText: 'BOOK THIS SERVICE',
+      }
+    }),
   ])
   console.log('✅ Created website content')
 
@@ -459,6 +526,44 @@ async function main() {
     })
   ])
   console.log('✅ Created FAQ')
+
+  // Create Time Classifications
+  console.log('🕐 Creating time classifications...')
+  await Promise.all([
+    prisma.timeClassification.create({
+      data: {
+        label: 'Morning',
+        ranges: JSON.stringify([
+          { start: '08:30', end: '10:30', label: '8:30 AM – 10:30 AM' },
+          { start: '10:35', end: '12:00', label: '10:35 AM – 12:00 PM' },
+        ]),
+        description: '8:30 AM – 10:30 AM, 10:35 AM – 12:00 PM',
+        icon: 'Sun',
+        color: 'text-yellow-400',
+        bgColor: 'bg-yellow-500/10 border-yellow-500/20',
+        order: 0,
+        isActive: true,
+        bookingLimit: 5
+      }
+    }),
+    prisma.timeClassification.create({
+      data: {
+        label: 'Afternoon',
+        ranges: JSON.stringify([
+          { start: '14:00', end: '15:30', label: '2:00 PM – 3:30 PM' },
+          { start: '15:35', end: '17:00', label: '3:35 PM – 5:00 PM' },
+        ]),
+        description: '2:00 PM – 3:30 PM, 3:35 PM – 5:00 PM',
+        icon: 'Sunset',
+        color: 'text-orange-400',
+        bgColor: 'bg-orange-500/10 border-orange-500/20',
+        order: 1,
+        isActive: true,
+        bookingLimit: 5
+      }
+    })
+  ])
+  console.log('✅ Created time classifications')
 
   console.log('🎉 Database seed completed successfully!')
   console.log('')

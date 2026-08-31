@@ -118,8 +118,10 @@ function ReviewModal({
         {/* Header */}
         <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {mechanic.avatar && (
+            {mechanic.avatar ? (
               <img src={mechanic.avatar} alt={mechanic.name} className="w-10 h-10 rounded-xl object-cover border border-white/10" />
+            ) : (
+              <InitialsAvatar name={mechanic.name} className="w-10 h-10 rounded-xl text-sm" />
             )}
             <div>
               <p className="font-bold text-white text-sm">Review {mechanic.name.split(' ')[0]}</p>
@@ -210,6 +212,25 @@ function ReviewModal({
   );
 }
 
+// ─── Initials avatar (shown when no photo is uploaded) ───────────────────────
+function InitialsAvatar({ name, className = '' }: { name: string; className?: string }) {
+  const initials = name
+    .split(' ')
+    .slice(0, 2)
+    .map(w => w[0]?.toUpperCase() ?? '')
+    .join('')
+  return (
+    // container-type:size lets children use cqmin/cqmax units relative to this box
+    <div
+      className={`flex items-center justify-center bg-red-600 text-black font-black font-mono select-none ${className}`}
+      style={{ containerType: 'size' }}
+    >
+      {/* 42cqmin ≈ 42% of the shorter container dimension — fills nicely for 2 letters */}
+      <span style={{ fontSize: '42cqmin', lineHeight: 1 }}>{initials}</span>
+    </div>
+  )
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export const MechanicsShowcase: React.FC<MechanicsShowcaseProps> = ({
   mechanics,
@@ -293,8 +314,12 @@ export const MechanicsShowcase: React.FC<MechanicsShowcaseProps> = ({
                 {/* Photo */}
                 <div className="lg:col-span-5 relative">
                   <div className="relative aspect-[4/5] rounded-2xl overflow-hidden border border-white/10 bg-zinc-900 shadow-2xl">
-                    <img src={activeMechanic.avatar} alt={activeMechanic.name}
-                      className="w-full h-full object-cover object-center contrast-110" loading="lazy" />
+                    {activeMechanic.avatar ? (
+                      <img src={activeMechanic.avatar} alt={activeMechanic.name}
+                        className="w-full h-full object-cover object-center contrast-110" loading="lazy" />
+                    ) : (
+                      <InitialsAvatar name={activeMechanic.name} className="w-full h-full" />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/30" />
                     <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between pointer-events-none">
                       <div className="px-3 py-1.5 rounded-lg bg-black/80 backdrop-blur-md border border-white/10 text-xs font-mono text-white flex items-center gap-2">

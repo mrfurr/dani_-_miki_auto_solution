@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noEmit": false,
+    "outDir": ".scripts-dist"
+  },
+  "include": [
+    "scripts/**/*.ts",
+    "prisma/**/*.ts",
+    "generated/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

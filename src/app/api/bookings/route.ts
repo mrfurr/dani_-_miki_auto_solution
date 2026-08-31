@@ -21,7 +21,8 @@ const bookingSchema = z.object({
   depositAmount: z.number().positive('Deposit must be positive'),
   depositMethod: z.string().min(1, 'Payment method is required'),
   transactionRef: z.string().optional().default('N/A'),
-  paymentScreenshot: z.any().optional() // File object
+  branchId: z.string().optional().nullable(),
+  paymentScreenshot: z.any().optional()
 })
 
 // Helper to safely get optional string from form data
@@ -51,6 +52,7 @@ export async function POST(request: NextRequest) {
       depositAmount: parseFloat(formData.get('depositAmount') as string),
       depositMethod: formData.get('depositMethod') as string,
       transactionRef: formData.get('transactionRef') as string,
+      branchId: getOptionalField(formData, 'branchId'),
     }
 
     const paymentScreenshot = formData.get('paymentScreenshot') as File | null
@@ -70,22 +72,40 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check availability (prevent double booking)
-    const existingBooking = await prisma.booking.findFirst({
-      where: {
-        date: validatedData.date,
-        time: validatedData.time,
-        status: {
-          in: ['PENDING_VERIFICATION', 'APPROVED', 'CHECKED_IN', 'IN_PROGRESS']
-        }
-      }
+    // Check booking limit for the time group
+    const timeClassifications = await prisma.timeClassification.findMany({
+      where: { isActive: true }
     })
 
-    if (existingBooking) {
-      return NextResponse.json(
-        { error: 'This time slot is already booked' },
-        { status: 409 }
-      )
+    // Get all approved bookings for this date+branch (pending don't occupy a spot until approved)
+    const activeDayBookings = await prisma.booking.findMany({
+      where: {
+        date: validatedData.date,
+        status: { in: ['APPROVED', 'CHECKED_IN', 'IN_PROGRESS'] },
+        // scope to branch if provided
+        ...(validatedData.branchId ? { branchId: validatedData.branchId } : {})
+      },
+      select: { time: true }
+    })
+
+    for (const tc of timeClassifications) {
+      // ranges are now objects: [{start:"08:30", end:"10:30", label:"..."}]
+      const ranges: Array<{start:string; end:string; label:string}> = JSON.parse(tc.ranges)
+      const startTimes = ranges.map(r => r.start)
+
+      // Is the selected slot in this group?
+      const inGroup = startTimes.includes(validatedData.time)
+      if (!inGroup) continue
+
+      // Count how many active bookings for this date fall in this group
+      const countInGroup = activeDayBookings.filter(b => startTimes.includes(b.time)).length
+
+      if (countInGroup >= tc.bookingLimit) {
+        return NextResponse.json(
+          { error: `The ${tc.label} time slot is fully booked for this date. Please choose a different date or time.` },
+          { status: 409 }
+        )
+      }
     }
 
     // Upload payment screenshot - required
@@ -156,10 +176,12 @@ export async function POST(request: NextRequest) {
         depositMethod: validatedData.depositMethod,
         transactionRef: validatedData.transactionRef,
         paymentScreenshot: paymentScreenshotPath,
+        branchId: validatedData.branchId ?? null,
         status: 'PENDING_VERIFICATION'
       },
       include: {
-        package: true
+        package: true,
+        branch: true
       }
     })
 
@@ -227,7 +249,8 @@ export async function GET(request: NextRequest) {
     const bookings = await prisma.booking.findMany({
       where,
       include: {
-        package: true
+        package: true,
+        branch: { select: { name: true, address: true } }
       },
       orderBy: {
         createdAt: 'desc'

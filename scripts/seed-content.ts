@@ -67,7 +67,7 @@ async function main() {
         stat3_label: 'ECU MAP CLOUD BACKUPS',
       }),
       ctaText: null,
-      imageUrl: 'https://images.unsplash.com/photo-1486006920555-c77dce18193b?auto=format&fit=crop&w=2000&q=90',
+      imageUrl: 'https://flojmgyiopjuesgpqpup.supabase.co/storage/v1/object/public/website/defaults/hero-garage.jpg',
     },
 
     // ── WHY CHOOSE US ─────────────────────────────────────────────────────────

@@ -212,9 +212,13 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking, c
             <div className="rounded-2xl overflow-hidden border border-white/10 h-48 bg-zinc-900/40 flex items-center justify-center">
               <div className="text-center space-y-2">
                 <MapPin size={28} className="text-red-500/60 mx-auto" />
-                <p className="text-xs font-mono text-zinc-500">BOLE MEDHANIALEM, ADDIS ABABA</p>
+                <p className="text-xs font-mono text-zinc-500 uppercase">
+                  {c('address_title', 'Workshop Location')}
+                </p>
                 <a
-                  href={`https://maps.google.com/?q=Bole+Medhanialem+Addis+Ababa`}
+                  href={`https://maps.google.com/?q=${encodeURIComponent(
+                    c('address_title', '') + ' ' + c('address_body', '').split('·')[0].trim()
+                  )}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-red-400 hover:text-red-300 font-mono underline transition-colors"

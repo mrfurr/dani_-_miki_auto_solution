@@ -414,7 +414,8 @@ export const ModelName = {
   FAQ: 'FAQ',
   SocialLink: 'SocialLink',
   SiteSetting: 'SiteSetting',
-  WebsiteContent: 'WebsiteContent'
+  WebsiteContent: 'WebsiteContent',
+  TimeClassification: 'TimeClassification'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -430,7 +431,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "admin" | "booking" | "package" | "service" | "mechanic" | "review" | "message" | "bankAccount" | "businessHour" | "breakHour" | "blockedDate" | "blockedTime" | "inPersonBooking" | "branch" | "fAQ" | "socialLink" | "siteSetting" | "websiteContent"
+    modelProps: "admin" | "booking" | "package" | "service" | "mechanic" | "review" | "message" | "bankAccount" | "businessHour" | "breakHour" | "blockedDate" | "blockedTime" | "inPersonBooking" | "branch" | "fAQ" | "socialLink" | "siteSetting" | "websiteContent" | "timeClassification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1766,6 +1767,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    TimeClassification: {
+      payload: Prisma.$TimeClassificationPayload<ExtArgs>
+      fields: Prisma.TimeClassificationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TimeClassificationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimeClassificationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TimeClassificationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimeClassificationPayload>
+        }
+        findFirst: {
+          args: Prisma.TimeClassificationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimeClassificationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TimeClassificationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimeClassificationPayload>
+        }
+        findMany: {
+          args: Prisma.TimeClassificationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimeClassificationPayload>[]
+        }
+        create: {
+          args: Prisma.TimeClassificationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimeClassificationPayload>
+        }
+        createMany: {
+          args: Prisma.TimeClassificationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TimeClassificationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimeClassificationPayload>[]
+        }
+        delete: {
+          args: Prisma.TimeClassificationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimeClassificationPayload>
+        }
+        update: {
+          args: Prisma.TimeClassificationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimeClassificationPayload>
+        }
+        deleteMany: {
+          args: Prisma.TimeClassificationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TimeClassificationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TimeClassificationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimeClassificationPayload>[]
+        }
+        upsert: {
+          args: Prisma.TimeClassificationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TimeClassificationPayload>
+        }
+        aggregate: {
+          args: Prisma.TimeClassificationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTimeClassification>
+        }
+        groupBy: {
+          args: Prisma.TimeClassificationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TimeClassificationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TimeClassificationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TimeClassificationCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1831,6 +1906,7 @@ export const BookingScalarFieldEnum = {
   packageId: 'packageId',
   date: 'date',
   time: 'time',
+  branchId: 'branchId',
   depositAmount: 'depositAmount',
   depositMethod: 'depositMethod',
   transactionRef: 'transactionRef',
@@ -2065,6 +2141,24 @@ export const WebsiteContentScalarFieldEnum = {
 } as const
 
 export type WebsiteContentScalarFieldEnum = (typeof WebsiteContentScalarFieldEnum)[keyof typeof WebsiteContentScalarFieldEnum]
+
+
+export const TimeClassificationScalarFieldEnum = {
+  id: 'id',
+  label: 'label',
+  ranges: 'ranges',
+  description: 'description',
+  icon: 'icon',
+  color: 'color',
+  bgColor: 'bgColor',
+  order: 'order',
+  isActive: 'isActive',
+  bookingLimit: 'bookingLimit',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TimeClassificationScalarFieldEnum = (typeof TimeClassificationScalarFieldEnum)[keyof typeof TimeClassificationScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2356,6 +2450,7 @@ export type GlobalOmitConfig = {
   socialLink?: Prisma.SocialLinkOmit
   siteSetting?: Prisma.SiteSettingOmit
   websiteContent?: Prisma.WebsiteContentOmit
+  timeClassification?: Prisma.TimeClassificationOmit
 }
 
 /* Types for Logging */

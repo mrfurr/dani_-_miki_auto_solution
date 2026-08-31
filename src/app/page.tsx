@@ -137,7 +137,7 @@ export default function App() {
         rating: mech.averageRating || 0,
         experienceYears: parseInt(mech.experience) || 0,
         certifications: mech.certifications || [],
-        avatar: mech.photo || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80',
+        avatar: mech.photo || null,
         bio: mech.bio,
         specialties: mech.specialization?.split(', ') || [],
         isAvailable: mech.isActive,
@@ -265,6 +265,7 @@ export default function App() {
         services={services}
         preselectedServiceId={preselectedServiceId}
         onBookingCreated={() => fetchWebsiteData()}
+        contactContent={siteContent['contact_section']}
       />
     </div>
   );

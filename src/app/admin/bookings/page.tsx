@@ -13,6 +13,7 @@ interface Booking {
   customerName: string; customerPhone: string; customerEmail: string
   vehicleMake: string | null; vehicleModel: string | null; vehicleYear: string | null; plateNumber: string | null
   package: { name: string; price: number | null }
+  branch: { name: string; address: string } | null
   date: string; time: string; depositAmount: number; depositMethod: string; transactionRef: string
   paymentScreenshot: string | null; status: string; createdAt: string
   approvedAt: string | null; checkedInAt: string | null; completedAt: string | null; rejectionReason: string | null
@@ -134,6 +135,7 @@ export default function AdminBookingsPage() {
                 <TD>
                   <p className="text-zinc-300 text-xs font-mono">{b.date}</p>
                   <p className="text-zinc-500 text-xs">{b.time}</p>
+                  {b.branch && <p className="text-zinc-600 text-[10px] font-mono truncate max-w-[130px]">{b.branch.name}</p>}
                 </TD>
                 <TD>
                   <p className="text-zinc-300 text-sm">{b.depositAmount} ETB</p>
@@ -189,6 +191,7 @@ export default function AdminBookingsPage() {
                   ['Date', selected.date],
                   ['Time', selected.time],
                   ['Service', selected.package.name],
+                  ...(selected.branch ? [['Branch', `${selected.branch.name} · ${selected.branch.address}`]] : []),
                   ['Deposit', `${selected.depositAmount} ETB`],
                   ['Method', selected.depositMethod],
                   ['Ref #', selected.transactionRef],

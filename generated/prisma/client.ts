@@ -131,3 +131,8 @@ export type SiteSetting = Prisma.SiteSettingModel
  * 
  */
 export type WebsiteContent = Prisma.WebsiteContentModel
+/**
+ * Model TimeClassification
+ * 
+ */
+export type TimeClassification = Prisma.TimeClassificationModel

@@ -7,7 +7,7 @@ import {
   X, User, Car, Wrench, Calendar as CalendarIcon, Clock,
   CreditCard, Upload, CheckCircle2, ArrowRight, ArrowLeft,
   ShieldCheck, Copy, Check, AlertCircle, Loader2,
-  ChevronLeft, ChevronRight, Sun, Sunset, Moon
+  ChevronLeft, ChevronRight, Sun, Sunset
 } from 'lucide-react';
 
 // ─── Advanced Calendar ────────────────────────────────────────────────────────
@@ -15,14 +15,15 @@ const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 interface AdvancedCalendarProps {
-  selected: string;           // YYYY-MM-DD
+  selected: string;
   onSelect: (d: string) => void;
-  maxDays?: number;            // from admin settings
-  blockedDates?: string[];     // YYYY-MM-DD list
+  maxDays?: number;
+  blockedDates?: string[];
+  compact?: boolean;
 }
 
 const AdvancedCalendar: React.FC<AdvancedCalendarProps> = ({
-  selected, onSelect, maxDays = 30, blockedDates = []
+  selected, onSelect, maxDays = 30, blockedDates = [], compact = false
 }) => {
   const today = new Date(); today.setHours(0,0,0,0);
   const [viewYear,  setViewYear]  = useState(today.getFullYear());
@@ -70,26 +71,28 @@ const AdvancedCalendar: React.FC<AdvancedCalendarProps> = ({
   const canGoNext = new Date(viewYear, viewMonth + 1, 1) <= maxDate;
 
   return (
-    <div className="bg-zinc-900/60 border border-white/10 rounded-2xl p-4 select-none">
+    <div className={`bg-zinc-900/60 border border-white/10 rounded-2xl select-none ${compact ? 'p-2.5' : 'p-4'}`}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className={`flex items-center justify-between ${compact ? 'mb-2' : 'mb-4'}`}>
         <button onClick={prevMonth} disabled={!canGoPrev}
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
-          <ChevronLeft size={16} />
+          className={`rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all ${compact ? 'w-6 h-6' : 'w-8 h-8'}`}>
+          <ChevronLeft size={compact ? 12 : 16} />
         </button>
-        <span className="font-display font-black text-sm text-white uppercase tracking-wider">
-          {MONTHS[viewMonth]} {viewYear}
+        <span className={`font-display font-black text-white uppercase tracking-wider ${compact ? 'text-xs' : 'text-sm'}`}>
+          {compact ? `${MONTHS[viewMonth].slice(0,3)} ${viewYear}` : `${MONTHS[viewMonth]} ${viewYear}`}
         </span>
         <button onClick={nextMonth} disabled={!canGoNext}
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
-          <ChevronRight size={16} />
+          className={`rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all ${compact ? 'w-6 h-6' : 'w-8 h-8'}`}>
+          <ChevronRight size={compact ? 12 : 16} />
         </button>
       </div>
 
       {/* Day labels */}
       <div className="grid grid-cols-7 mb-1">
         {DAYS.map(d => (
-          <div key={d} className="text-center text-[10px] font-mono text-zinc-600 py-1 uppercase">{d}</div>
+          <div key={d} className={`text-center font-mono text-zinc-600 py-0.5 uppercase ${compact ? 'text-[9px]' : 'text-[10px]'}`}>
+            {compact ? d.slice(0,1) : d}
+          </div>
         ))}
       </div>
 
@@ -101,11 +104,9 @@ const AdvancedCalendar: React.FC<AdvancedCalendarProps> = ({
         transition={{ duration: 0.15 }}
         className="grid grid-cols-7 gap-0.5"
       >
-        {/* Empty cells for first week */}
         {Array.from({ length: firstDay }, (_, i) => (
           <div key={`e-${i}`} />
         ))}
-        {/* Day buttons */}
         {Array.from({ length: daysInMonth }, (_, i) => {
           const day = i + 1;
           const disabled = isDisabled(day);
@@ -118,9 +119,10 @@ const AdvancedCalendar: React.FC<AdvancedCalendarProps> = ({
               disabled={disabled}
               whileTap={!disabled ? { scale: 0.88 } : undefined}
               className={`
-                relative aspect-square rounded-xl text-xs font-mono font-bold flex items-center justify-center transition-all
+                relative aspect-square rounded-lg font-mono font-bold flex items-center justify-center transition-all
+                ${compact ? 'text-[10px]' : 'text-xs rounded-xl'}
                 ${sel
-                  ? 'bg-red-600 text-white shadow-[0_0_12px_rgba(220,38,38,0.5)]'
+                  ? 'bg-red-600 text-white shadow-[0_0_8px_rgba(220,38,38,0.5)]'
                   : tod && !disabled
                   ? 'bg-red-600/20 border border-red-500/50 text-red-300'
                   : disabled
@@ -138,136 +140,157 @@ const AdvancedCalendar: React.FC<AdvancedCalendarProps> = ({
         })}
       </motion.div>
 
-      {/* Legend */}
-      <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-4 text-[10px] font-mono text-zinc-600">
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-600" /> Selected</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-600/20 border border-red-500/50" /> Today</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-zinc-800" /> Unavailable</span>
-      </div>
-    </div>
-  );
-};
-
-// ─── Grouped time slots (Morning / Afternoon / Night) ─────────────────────────
-interface GroupedTimeSlotsProps {
-  slots: string[];
-  selected: string;
-  onSelect: (s: string) => void;
-}
-
-function parse12hToMinutes(t: string): number {
-  const [time, ampm] = t.split(' ');
-  const [h, m] = time.split(':').map(Number);
-  return ((h % 12) + (ampm === 'PM' ? 12 : 0)) * 60 + m;
-}
-
-const GROUPS = [
-  { label: 'Morning',   icon: Sun,    range: [8*60+30, 12*60],     color: 'text-yellow-400',  bg: 'bg-yellow-500/10 border-yellow-500/20' },
-  { label: 'Afternoon', icon: Sunset, range: [13*60+30, 17*60+30], color: 'text-orange-400',  bg: 'bg-orange-500/10 border-orange-500/20' },
-  { label: 'Night',     icon: Moon,   range: [17*60+40, 20*60+30], color: 'text-blue-400',    bg: 'bg-blue-500/10 border-blue-500/20' },
-];
-
-const GroupedTimeSlots: React.FC<GroupedTimeSlotsProps> = ({ slots, selected, onSelect }) => {
-  const [openGroup, setOpenGroup] = useState<string | null>(null);
-
-  // Auto-open the group that contains the selected slot
-  useEffect(() => {
-    if (!selected) return;
-    const mins = parse12hToMinutes(selected);
-    const g = GROUPS.find(g => mins >= g.range[0] && mins <= g.range[1]);
-    if (g) setOpenGroup(g.label);
-  }, [selected]);
-
-  // Assign slots to groups
-  const grouped: Record<string, string[]> = { Morning: [], Afternoon: [], Night: [], Other: [] };
-  for (const slot of slots) {
-    const mins = parse12hToMinutes(slot);
-    const g = GROUPS.find(g => mins >= g.range[0] && mins <= g.range[1]);
-    if (g) grouped[g.label].push(slot);
-    else grouped.Other.push(slot);
-  }
-
-  return (
-    <div className="space-y-2">
-      {GROUPS.map(({ label, icon: Icon, color, bg }) => {
-        const groupSlots = grouped[label];
-        if (groupSlots.length === 0) return null;
-        const isOpen = openGroup === label;
-        const hasSelected = groupSlots.includes(selected);
-
-        return (
-          <div key={label} className={`rounded-xl border overflow-hidden ${hasSelected ? 'border-red-500/50' : 'border-white/8'}`}>
-            {/* Group header */}
-            <button
-              onClick={() => setOpenGroup(isOpen ? null : label)}
-              className={`w-full flex items-center justify-between px-4 py-3 transition-all ${isOpen ? 'bg-zinc-800/60' : 'bg-zinc-900/50 hover:bg-zinc-800/40'}`}
-            >
-              <div className="flex items-center gap-2.5">
-                <Icon size={15} className={color} />
-                <span className={`text-sm font-bold ${color}`}>{label}</span>
-                <span className="text-[10px] font-mono text-zinc-600">
-                  {label === 'Morning' ? '8:30 AM – 12:00 PM' :
-                   label === 'Afternoon' ? '1:30 PM – 5:30 PM' :
-                   '5:40 PM – 8:30 PM'}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                {hasSelected && (
-                  <span className="text-[10px] font-mono font-bold text-red-400 px-2 py-0.5 bg-red-600/15 rounded-full">Selected</span>
-                )}
-                <span className="text-[10px] font-mono text-zinc-500">{groupSlots.length} slots</span>
-                <ChevronRight size={12} className={`text-zinc-500 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
-              </div>
-            </button>
-
-            {/* Slot grid */}
-            <AnimatePresence initial={false}>
-              {isOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className={`px-3 py-3 grid grid-cols-3 sm:grid-cols-4 gap-2 ${bg}`}>
-                    {groupSlots.map(slot => (
-                      <motion.button
-                        key={slot}
-                        type="button"
-                        onClick={() => onSelect(slot)}
-                        whileTap={{ scale: 0.93 }}
-                        className={`py-2.5 px-2 rounded-xl text-xs font-mono font-bold transition-all ${
-                          selected === slot
-                            ? 'bg-red-600 text-white shadow-[0_0_14px_rgba(220,38,38,0.5)]'
-                            : 'bg-zinc-900/80 hover:bg-zinc-700 text-zinc-200 border border-white/8'
-                        }`}
-                      >
-                        {slot}
-                      </motion.button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        );
-      })}
-
-      {/* Other slots not in any group */}
-      {grouped.Other.length > 0 && (
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-          {grouped.Other.map(slot => (
-            <button key={slot} type="button" onClick={() => onSelect(slot)}
-              className={`py-2.5 rounded-xl text-xs font-mono font-bold transition-all ${selected === slot ? 'bg-red-600 text-white' : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-white/8'}`}>
-              {slot}
-            </button>
-          ))}
+      {/* Legend — hidden in compact mode */}
+      {!compact && (
+        <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-4 text-[10px] font-mono text-zinc-600">
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-600" /> Selected</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-600/20 border border-red-500/50" /> Today</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-zinc-800" /> Unavailable</span>
         </div>
       )}
     </div>
   );
 };
+
+// ─── Grouped time slots — range cards ────────────────────────────────────────
+interface SlotRange {
+  start: string   // HH:mm (24h) — used as booking time value
+  end:   string   // HH:mm (24h)
+  label: string   // "8:30 AM – 10:30 AM" — displayed to customer
+}
+
+interface TimeGroup {
+  id:              string
+  label:           string
+  icon:            string | null
+  color:           string | null
+  bgColor:         string | null
+  ranges:          SlotRange[]
+  bookingLimit:    number
+  currentBookings?: number
+  isFull?:         boolean
+}
+
+interface GroupedTimeSlotsProps {
+  // available slots returned by /api/availability
+  slots: Array<{ label: string; start: string; end: string; groupLabel: string }>
+  selected: string   // stores the range start time (HH:mm)
+  onSelect:  (start: string, label: string) => void
+  classifications?: TimeGroup[]
+}
+
+const DEFAULT_GROUPS: TimeGroup[] = [
+  {
+    id: 'morning', label: 'Morning', icon: 'Sun',
+    color: 'text-yellow-400', bgColor: 'bg-yellow-500/10 border-yellow-500/20',
+    ranges: [
+      { start: '08:30', end: '10:30', label: '8:30 AM – 10:30 AM' },
+      { start: '10:35', end: '12:00', label: '10:35 AM – 12:00 PM' },
+    ],
+    bookingLimit: 5,
+  },
+  {
+    id: 'afternoon', label: 'Afternoon', icon: 'Sunset',
+    color: 'text-orange-400', bgColor: 'bg-orange-500/10 border-orange-500/20',
+    ranges: [
+      { start: '14:00', end: '15:30', label: '2:00 PM – 3:30 PM' },
+      { start: '15:35', end: '17:00', label: '3:35 PM – 5:00 PM' },
+    ],
+    bookingLimit: 5,
+  },
+]
+
+const GroupedTimeSlots: React.FC<GroupedTimeSlotsProps> = ({ slots, selected, onSelect, classifications }) => {
+  const groups: TimeGroup[] = (classifications && classifications.length > 0)
+    ? classifications
+    : DEFAULT_GROUPS
+
+  // Build a Set of available slot start times for quick lookup
+  const availableStarts = new Set(slots.map(s => s.start))
+
+  return (
+    <div className="space-y-3">
+      {groups.map((group, groupIdx) => {
+        const Icon = group.icon === 'Sun' ? Sun : Sunset
+        const color   = group.color   || 'text-zinc-400'
+        const bg      = group.bgColor || 'bg-zinc-500/10 border-zinc-500/20'
+        const isFull  = group.isFull ?? false
+        const spotsLeft = (group.currentBookings != null)
+          ? group.bookingLimit - group.currentBookings
+          : null
+
+        // Filter group's ranges to those that are available
+        const availableRanges = group.ranges.filter(r => availableStarts.has(r.start))
+        const groupSelected = group.ranges.some(r => r.start === selected)
+
+        // unique stable key
+        const groupKey = group.id || group.label || String(groupIdx)
+
+        return (
+          <div key={groupKey}
+            className={`rounded-2xl border overflow-hidden transition-all ${
+              isFull ? 'opacity-50 border-zinc-700/40' :
+              groupSelected ? 'border-red-500/40' :
+              'border-white/8'
+            }`}
+          >
+            {/* Group header */}
+            <div className={`flex items-center justify-between px-4 py-3 ${isFull ? 'bg-zinc-900/30' : 'bg-zinc-900/60'}`}>
+              <div className="flex items-center gap-2.5">
+                <Icon size={15} className={isFull ? 'text-zinc-600' : color} />
+                <span className={`text-sm font-bold ${isFull ? 'text-zinc-600' : color}`}>{group.label}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {isFull ? (
+                  <span className="text-[10px] font-mono font-bold text-zinc-500 px-2 py-0.5 bg-zinc-800 rounded-full">FULL</span>
+                ) : spotsLeft != null ? (
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                    spotsLeft <= 2 ? 'text-orange-400 bg-orange-500/10' : 'text-zinc-500 bg-zinc-800/50'
+                  }`}>
+                    {spotsLeft} spot{spotsLeft !== 1 ? 's' : ''} left
+                  </span>
+                ) : null}
+              </div>
+            </div>
+
+            {/* Range slot cards */}
+            <div className={`px-3 py-3 grid grid-cols-1 sm:grid-cols-2 gap-2 ${bg}`}>
+              {group.ranges.map(range => {
+                const isAvailable = availableStarts.has(range.start)
+                const isSelected  = selected === range.start
+
+                return (
+                  <motion.button
+                    key={range.start}
+                    type="button"
+                    disabled={!isAvailable || isFull}
+                    onClick={() => { sounds.playClick(); onSelect(range.start, range.label); }}
+                    whileTap={isAvailable && !isFull ? { scale: 0.97 } : undefined}
+                    className={`relative flex items-center justify-between px-4 py-3 rounded-xl text-sm font-mono font-bold transition-all border ${
+                      isSelected
+                        ? 'bg-red-600 text-white border-red-500 shadow-[0_0_16px_rgba(220,38,38,0.4)]'
+                        : isAvailable && !isFull
+                        ? 'bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 border-white/10 hover:border-white/20'
+                        : 'bg-zinc-900/30 text-zinc-600 border-white/5 cursor-not-allowed'
+                    }`}
+                  >
+                    <span>{range.label}</span>
+                    {isSelected && (
+                      <span className="text-[10px] font-mono bg-white/20 px-1.5 py-0.5 rounded-full ml-2">✓</span>
+                    )}
+                    {!isAvailable && !isFull && (
+                      <span className="text-[10px] font-mono text-zinc-600 ml-2">Unavailable</span>
+                    )}
+                  </motion.button>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -276,6 +299,7 @@ interface BookingModalProps {
   services: ServiceItem[];
   preselectedServiceId?: string;
   onBookingCreated: () => void;
+  contactContent?: Record<string, string>;
 }
 
 interface BankAccount {
@@ -292,6 +316,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   services,
   preselectedServiceId,
   onBookingCreated,
+  contactContent = {},
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [copiedBank, setCopiedBank] = useState<string | null>(null);
@@ -309,8 +334,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
   const [selectedServiceId, setSelectedServiceId] = useState<string>('');
   const [preferredDate, setPreferredDate] = useState<string>('');
-  const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
-  const [preferredTime, setPreferredTime] = useState<string>('');
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<Array<{label:string;start:string;end:string;groupLabel:string}>>([]);
+  const [preferredTime, setPreferredTime] = useState<string>('');    // HH:mm (24h)
+  const [preferredTimeLabel, setPreferredTimeLabel] = useState<string>(''); // "8:30 AM – 10:30 AM"
   const [isLoadingTimeSlots, setIsLoadingTimeSlots] = useState(false);
   const [notes, setNotes] = useState('');
 
@@ -319,14 +345,40 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const [paymentRefNumber, setPaymentRefNumber] = useState('');
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
   const [maxBookingDays, setMaxBookingDays] = useState(30); // from admin settings
+  const [timeClassifications, setTimeClassifications] = useState<any[]>([]);
 
-  // Fetch max booking days from settings on mount
+  // Branch selection
+  const [branches, setBranches] = useState<Array<{id:string;name:string;address:string;phone:string|null;mapUrl:string|null}>>([]);
+  const [selectedBranchId, setSelectedBranchId] = useState<string>('');
+
+  // Fetch max booking days and time classifications from settings on mount
   useEffect(() => {
     fetch('/api/settings')
       .then(r => r.json())
       .then(d => {
         const days = parseInt(d.settings?.max_booking_days || '30');
         if (!isNaN(days) && days > 0) setMaxBookingDays(days);
+      })
+      .catch(() => {});
+
+    // Fetch time classifications
+    fetch('/api/time-classifications')
+      .then(r => r.json())
+      .then(d => {
+        if (d.classifications) {
+          setTimeClassifications(d.classifications);
+        }
+      })
+      .catch(() => {});
+
+    // Fetch active branches
+    fetch('/api/branches')
+      .then(r => r.json())
+      .then(d => {
+        const list = d.branches || [];
+        setBranches(list);
+        // Auto-select if only one branch
+        if (list.length === 1) setSelectedBranchId(list[0].id);
       })
       .catch(() => {});
   }, []);
@@ -354,12 +406,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     fetchBankAccounts();
   }, []);
 
-  // Fetch available time slots when date changes
+  // Fetch available time slots when date or branch changes
   useEffect(() => {
     if (preferredDate) {
       fetchAvailableTimeSlots(preferredDate);
     }
-  }, [preferredDate]);
+  }, [preferredDate, selectedBranchId]);
 
   const fetchBankAccounts = async () => {
     try {
@@ -377,17 +429,30 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const fetchAvailableTimeSlots = async (date: string) => {
     setIsLoadingTimeSlots(true);
     try {
-      const response = await fetch(`/api/availability?date=${date}`);
-      const data = await response.json();
-      
+      // Include branchId in queries so counts are per-branch
+      const branchParam = selectedBranchId ? `&branchId=${selectedBranchId}` : '';
+      const [availRes, tcRes] = await Promise.all([
+        fetch(`/api/availability?date=${date}${branchParam}`),
+        fetch(`/api/time-classifications?date=${date}${branchParam}`)
+      ]);
+      const data = await availRes.json();
+      const tcData = await tcRes.json();
+
       if (data.available) {
         setAvailableTimeSlots(data.timeSlots || []);
+        // Auto-select first available slot
         if (data.timeSlots && data.timeSlots.length > 0) {
-          setPreferredTime(data.timeSlots[0]);
+          setPreferredTime(data.timeSlots[0].start);
+          setPreferredTimeLabel(data.timeSlots[0].label);
         }
       } else {
         setAvailableTimeSlots([]);
         setPreferredTime('');
+        setPreferredTimeLabel('');
+      }
+
+      if (tcData.classifications) {
+        setTimeClassifications(tcData.classifications);
       }
     } catch (error) {
       console.error('Error fetching availability:', error);
@@ -419,7 +484,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         setSubmitError('Please enter a valid phone number (at least 10 digits).');
         return;
       }
-      // Email is optional — validate format only if provided
       if (email && email.trim() && (!email.includes('@') || !email.includes('.'))) {
         setSubmitError('Please enter a valid email address or leave it blank.');
         return;
@@ -431,7 +495,16 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         return;
       }
     }
+    // Step 3: Branch selection
     if (currentStep === 3) {
+      if (branches.length > 1 && !selectedBranchId) {
+        setSubmitError('Please select a branch location.');
+        return;
+      }
+      // If only 1 branch, auto-select and skip visual step (already handled on load)
+    }
+    // Step 4: Date & time
+    if (currentStep === 4) {
       if (!preferredDate) {
         setSubmitError('Please select your preferred date.');
         return;
@@ -441,16 +514,15 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         return;
       }
     }
-    if (currentStep === 4) {
+    if (currentStep === 5) {
       if (!paymentScreenshot) {
         setSubmitError('Please upload a payment screenshot.');
         return;
       }
-      // Submit Booking
       submitBooking();
       return;
     }
-    setCurrentStep((prev) => Math.min(5, prev + 1));
+    setCurrentStep((prev) => Math.min(6, prev + 1));
   };
 
   const submitBooking = async () => {
@@ -460,15 +532,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     try {
       const selectedPkg = packages.find(p => p.id === selectedServiceId);
       const depositAmount = selectedPkg?.depositEtb || 200;
-
-      // Convert time to 24-hour format
-      const convertTo24Hour = (time12h: string) => {
-        const [time, modifier] = time12h.split(' ');
-        let [hours, minutes] = time.split(':');
-        if (hours === '12') hours = '00';
-        if (modifier === 'PM') hours = String(parseInt(hours) + 12);
-        return `${hours}:${minutes}`;
-      };
 
       const formData = new FormData();
       formData.append('customerName', customerName);
@@ -480,11 +543,14 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       formData.append('plateNumber', plateNumber);
       formData.append('packageId', selectedServiceId);
       formData.append('date', preferredDate);
-      formData.append('time', convertTo24Hour(preferredTime));
+      formData.append('time', preferredTime); // already HH:mm 24h format
       formData.append('notes', notes);
       formData.append('depositAmount', depositAmount.toString());
       formData.append('depositMethod', paymentMethod);
       formData.append('transactionRef', paymentRefNumber || 'N/A');
+      if (selectedBranchId) {
+        formData.append('branchId', selectedBranchId);
+      }
       if (paymentScreenshot) {
         formData.append('paymentScreenshot', paymentScreenshot);
       }
@@ -513,7 +579,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         }
 
         // Move to confirmation step
-        setCurrentStep(5);
+        setCurrentStep(6);
       } else {
         setSubmitError(data.error || 'Failed to submit booking. Please try again.');
       }
@@ -534,9 +600,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const steps = [
     { num: 1, title: 'CUSTOMER' },
     { num: 2, title: 'SERVICE' },
-    { num: 3, title: 'DATE & TIME' },
-    { num: 4, title: 'DEPOSIT' },
-    { num: 5, title: 'CONFIRM' },
+    { num: 3, title: 'BRANCH' },
+    { num: 4, title: 'DATE & TIME' },
+    { num: 5, title: 'DEPOSIT' },
+    { num: 6, title: 'CONFIRM' },
   ];
 
   return (
@@ -592,7 +659,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                         : 'bg-zinc-900 text-zinc-500 border border-zinc-700'
                     }`}
                   >
-                    {isCompleted ? <Check size={13} /> : `0${s.num}`}
+                    {isCompleted ? <Check size={13} /> : s.num < 10 ? `0${s.num}` : `${s.num}`}
                   </div>
                   <span
                     className={`text-[9px] font-mono tracking-wider uppercase hidden sm:block ${
@@ -783,7 +850,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               </motion.div>
             )}
 
-            {/* STEP 3: DATE & TIME */}
+            {/* STEP 3: BRANCH SELECTION */}
             {currentStep === 3 && (
               <motion.div
                 key="step3"
@@ -795,56 +862,88 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               >
                 <div>
                   <div className="text-xs font-mono uppercase text-red-500 font-bold tracking-widest">STEP 03</div>
-                  <h3 className="font-display font-black text-2xl text-white uppercase tracking-tight">WHEN SHOULD WE EXPECT YOU?</h3>
+                  <h3 className="font-display font-black text-2xl text-white uppercase tracking-tight">
+                    SELECT A BRANCH LOCATION
+                  </h3>
                 </div>
 
-                {/* ── Advanced Calendar ── */}
-                <div>
-                  <label className="block text-xs font-mono text-zinc-400 uppercase mb-2 flex items-center gap-1.5">
-                    <CalendarIcon size={13} className="text-red-400" />
-                    <span>Select Appointment Date</span>
-                  </label>
-                  <AdvancedCalendar
-                    selected={preferredDate}
-                    onSelect={(d) => setPreferredDate(d)}
-                    maxDays={maxBookingDays}
-                  />
-                </div>
-
-                {/* ── Grouped Time Slots ── */}
-                {preferredDate && (
-                  <div>
-                    <label className="block text-xs font-mono text-zinc-400 uppercase mb-2 flex items-center gap-1.5">
-                      <Clock size={13} className="text-red-400" />
-                      <span>Select Arrival Slot</span>
-                    </label>
-                    {isLoadingTimeSlots ? (
-                      <div className="flex items-center justify-center py-6">
-                        <Loader2 className="w-5 h-5 text-red-500 animate-spin" />
-                        <span className="ml-2 text-xs text-zinc-400 font-mono">Checking availability…</span>
-                      </div>
-                    ) : availableTimeSlots.length === 0 ? (
-                      <div className="p-4 rounded-xl bg-red-950/30 border border-red-500/30 text-red-400 text-xs font-mono text-center">
-                        No available slots for this date. Please choose another date.
-                      </div>
-                    ) : (
-                      <GroupedTimeSlots
-                        slots={availableTimeSlots}
-                        selected={preferredTime}
-                        onSelect={(t) => { sounds.playClick(); setPreferredTime(t); }}
-                      />
+                {branches.length === 0 ? (
+                  <div className="p-6 rounded-xl bg-zinc-900/50 border border-white/5 text-center text-zinc-500 text-sm font-mono">
+                    No branch locations configured yet.
+                  </div>
+                ) : branches.length === 1 ? (
+                  /* Single branch — show it as confirmed, no choice needed */
+                  <div className="p-4 rounded-xl bg-emerald-950/30 border border-emerald-500/30 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                      <ShieldCheck size={16} className="text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-white text-sm">{branches[0].name}</p>
+                      <p className="text-xs font-mono text-zinc-400 mt-0.5">{branches[0].address}</p>
+                      {branches[0].phone && <p className="text-xs font-mono text-zinc-500">{branches[0].phone}</p>}
+                    </div>
+                    {branches[0].mapUrl && (
+                      <a
+                        href={branches[0].mapUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-auto text-[10px] font-mono text-red-400 hover:text-red-300 transition-colors"
+                      >
+                        Map →
+                      </a>
                     )}
                   </div>
+                ) : (
+                  /* Multiple branches — pick one */
+                  <div className="space-y-3">
+                    {branches.map(branch => {
+                      const isSelected = selectedBranchId === branch.id;
+                      return (
+                        <motion.button
+                          key={branch.id}
+                          type="button"
+                          onClick={() => { sounds.playClick(); setSelectedBranchId(branch.id); }}
+                          whileTap={{ scale: 0.98 }}
+                          className={`w-full text-left p-4 rounded-xl border transition-all ${
+                            isSelected
+                              ? 'bg-red-950/40 border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
+                              : 'bg-zinc-900/60 border-white/8 hover:border-white/20'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <p className={`font-bold text-sm ${isSelected ? 'text-white' : 'text-zinc-200'}`}>
+                                {branch.name}
+                              </p>
+                              <p className="text-xs font-mono text-zinc-400 mt-0.5">{branch.address}</p>
+                              {branch.phone && <p className="text-xs font-mono text-zinc-500 mt-0.5">{branch.phone}</p>}
+                            </div>
+                            <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${
+                              isSelected ? 'border-red-500 bg-red-600' : 'border-zinc-600 bg-transparent'
+                            }`}>
+                              {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
+                            </div>
+                          </div>
+                          {branch.mapUrl && isSelected && (
+                            <a
+                              href={branch.mapUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={e => e.stopPropagation()}
+                              className="inline-flex items-center gap-1 mt-2 text-[10px] font-mono text-red-400 hover:text-red-300 transition-colors"
+                            >
+                              View on map →
+                            </a>
+                          )}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
                 )}
-
-                <div className="p-3.5 rounded-xl bg-zinc-900/50 border border-white/5 flex items-center gap-2.5 text-xs font-mono text-zinc-400">
-                  <ShieldCheck size={14} className="text-emerald-400 shrink-0" />
-                  <span>Workshop: Bole Medhanialem / Garage Zone, Addis Ababa.</span>
-                </div>
               </motion.div>
             )}
 
-            {/* STEP 4: SECURE YOUR APPOINTMENT (DEPOSIT 200 ETB) */}
+            {/* STEP 4: DATE & TIME */}
             {currentStep === 4 && (
               <motion.div
                 key="step4"
@@ -855,8 +954,86 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 className="space-y-4"
               >
                 <div>
+                  <div className="text-xs font-mono uppercase text-red-500 font-bold tracking-widest">STEP 04</div>
+                  <h3 className="font-display font-black text-2xl text-white uppercase tracking-tight">WHEN SHOULD WE EXPECT YOU?</h3>
+                </div>
+
+                {/* Compact Calendar + Time Slots side by side on desktop */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* ── Compact Calendar ── */}
+                  <div>
+                    <label className="block text-xs font-mono text-zinc-400 uppercase mb-2 flex items-center gap-1.5">
+                      <CalendarIcon size={11} className="text-red-400" />
+                      <span>Date</span>
+                    </label>
+                    <AdvancedCalendar
+                      selected={preferredDate}
+                      onSelect={(d) => setPreferredDate(d)}
+                      maxDays={maxBookingDays}
+                      compact
+                    />
+                  </div>
+
+                  {/* ── Time Slots ── */}
+                  <div>
+                    <label className="block text-xs font-mono text-zinc-400 uppercase mb-2 flex items-center gap-1.5">
+                      <Clock size={11} className="text-red-400" />
+                      <span>Time Slot</span>
+                    </label>
+                    {!preferredDate ? (
+                      <div className="h-full flex items-center justify-center py-8 text-zinc-600 text-xs font-mono text-center">
+                        Select a date first
+                      </div>
+                    ) : isLoadingTimeSlots ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="w-4 h-4 text-red-500 animate-spin" />
+                        <span className="ml-2 text-xs text-zinc-400 font-mono">Checking…</span>
+                      </div>
+                    ) : availableTimeSlots.length === 0 ? (
+                      <div className="p-4 rounded-xl bg-red-950/30 border border-red-500/30 text-red-400 text-xs font-mono text-center">
+                        No slots for this date.
+                      </div>
+                    ) : (
+                      <GroupedTimeSlots
+                        slots={availableTimeSlots}
+                        selected={preferredTime}
+                        onSelect={(start, label) => { setPreferredTime(start); setPreferredTimeLabel(label); }}
+                        classifications={timeClassifications}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Location badge */}
+                <div className="p-3 rounded-xl bg-zinc-900/50 border border-white/5 flex items-center gap-2 text-xs font-mono text-zinc-400">
+                  <ShieldCheck size={13} className="text-emerald-400 shrink-0" />
+                  <span>
+                    {branches.length === 1 && branches[0]
+                      ? `${branches[0].name} · ${branches[0].address}`
+                      : selectedBranchId
+                      ? (() => { const b = branches.find(br => br.id === selectedBranchId); return b ? `${b.name} · ${b.address}` : ''; })()
+                      : contactContent.address_title
+                        ? `${contactContent.address_title}${contactContent.address_body ? ' · ' + contactContent.address_body.split('·')[0].trim() : ''}`
+                        : 'Workshop location'
+                    }
+                  </span>
+                </div>
+              </motion.div>
+            )}
+
+            {/* STEP 5: SECURE YOUR APPOINTMENT (DEPOSIT 200 ETB) */}
+            {currentStep === 5 && (
+              <motion.div
+                key="step5"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-4"
+              >
+                <div>
                   <div className="text-xs font-mono uppercase text-red-500 font-bold tracking-widest">
-                    STEP 04
+                    STEP 05
                   </div>
                   <h3 className="font-display font-black text-2xl text-white uppercase tracking-tight">
                     SECURE APPOINTMENT DEPOSIT
@@ -962,10 +1139,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               </motion.div>
             )}
 
-            {/* STEP 5: BOOKING SUBMITTED & CONFIRMATION */}
-            {currentStep === 5 && (
+            {/* STEP 6: BOOKING SUBMITTED & CONFIRMATION */}
+            {currentStep === 6 && (
               <motion.div
-                key="step5"
+                key="step6"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4 }}
@@ -1003,8 +1180,16 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-zinc-500 uppercase">SCHEDULED SLOT:</span>
-                    <span className="text-zinc-200">{preferredDate} at {preferredTime}</span>
+                    <span className="text-zinc-200">{preferredDate} · {preferredTimeLabel || preferredTime}</span>
                   </div>
+                  {selectedBranchId && branches.find(b => b.id === selectedBranchId) && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-zinc-500 uppercase">BRANCH:</span>
+                      <span className="text-zinc-200 text-right max-w-[60%]">
+                        {branches.find(b => b.id === selectedBranchId)?.name}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between">
                     <span className="text-zinc-500 uppercase">DEPOSIT SUBMITTED:</span>
                     <span className="text-emerald-400 font-bold">200 ETB via {paymentMethod}</span>
@@ -1032,7 +1217,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         </div>
 
         {/* Modal Footer Controls */}
-        {currentStep < 5 && (
+        {currentStep < 6 && (
           <div className="px-6 py-4 border-t border-white/10 bg-zinc-950/80 flex flex-col gap-3">
             {/* Error Message */}
             {submitError && (
@@ -1075,7 +1260,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   </>
                 ) : (
                   <>
-                    <span>{currentStep === 4 ? 'SUBMIT & SECURE DEPOSIT' : 'CONTINUE'}</span>
+                    <span>{currentStep === 5 ? 'SUBMIT & SECURE DEPOSIT' : 'CONTINUE'}</span>
                     <ArrowRight size={14} />
                   </>
                 )}

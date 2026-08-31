@@ -54,6 +54,7 @@ ehthumbs.db
 # Prisma
 prisma/migrations/
 src/generated/prisma/
+generated/
 
 # Supabase
 .supabase/

@@ -10,7 +10,8 @@ import {
   Bell, Activity, PanelLeftClose
 } from 'lucide-react'
 import Image from 'next/image'
-import logoImg from '@/assets/images/dm_car_logo_1787333016188.jpg'
+
+const ADMIN_LOGO = '/images/D&m_Logo.jpg'
 
 interface AdminLayoutProps { children: React.ReactNode }
 interface NavItem { id: string; label: string; icon: any; group: string }
@@ -98,7 +99,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <div className="absolute inset-0 rounded-full border-2 border-red-600/20 animate-ping" />
             <div className="absolute inset-0 rounded-full border-2 border-red-600/40 border-t-red-500 animate-spin" />
             <div className="absolute inset-2 rounded-xl overflow-hidden">
-              <Image src={logoImg} alt="Logo" width={40} height={40} className="w-full h-full object-cover" priority />
+              <Image src={ADMIN_LOGO} alt="Logo" width={40} height={40} className="w-full h-full object-cover" priority />
             </div>          </div>
           <p className="text-zinc-500 text-xs font-mono tracking-widest uppercase">Authenticating…</p>
         </div>
@@ -135,7 +136,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <img src={logoUrl} alt="Logo" className="w-full h-full object-cover rounded-xl" />
             ) : (
               <Image
-                src={logoImg}
+                src={ADMIN_LOGO}
                 alt="Dani & Miki Auto Solution"
                 width={36}
                 height={36}
@@ -342,7 +343,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
                     ) : (
                       <Image
-                        src={logoImg}
+                        src={ADMIN_LOGO}
                         alt="Dani & Miki Auto Solution"
                         width={36}
                         height={36}

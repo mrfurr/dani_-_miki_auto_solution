@@ -68,7 +68,8 @@ export const ModelName = {
   FAQ: 'FAQ',
   SocialLink: 'SocialLink',
   SiteSetting: 'SiteSetting',
-  WebsiteContent: 'WebsiteContent'
+  WebsiteContent: 'WebsiteContent',
+  TimeClassification: 'TimeClassification'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -113,6 +114,7 @@ export const BookingScalarFieldEnum = {
   packageId: 'packageId',
   date: 'date',
   time: 'time',
+  branchId: 'branchId',
   depositAmount: 'depositAmount',
   depositMethod: 'depositMethod',
   transactionRef: 'transactionRef',
@@ -347,6 +349,24 @@ export const WebsiteContentScalarFieldEnum = {
 } as const
 
 export type WebsiteContentScalarFieldEnum = (typeof WebsiteContentScalarFieldEnum)[keyof typeof WebsiteContentScalarFieldEnum]
+
+
+export const TimeClassificationScalarFieldEnum = {
+  id: 'id',
+  label: 'label',
+  ranges: 'ranges',
+  description: 'description',
+  icon: 'icon',
+  color: 'color',
+  bgColor: 'bgColor',
+  order: 'order',
+  isActive: 'isActive',
+  bookingLimit: 'bookingLimit',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TimeClassificationScalarFieldEnum = (typeof TimeClassificationScalarFieldEnum)[keyof typeof TimeClassificationScalarFieldEnum]
 
 
 export const SortOrder = {

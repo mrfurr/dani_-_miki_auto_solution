@@ -13,7 +13,7 @@ export const INITIAL_SERVICES: ServiceItem[] = [
       'Actuator testing & bi-directional component activation',
       'OEM dealer software for BMW, Mercedes, Toyota, VAG, Land Rover'
     ],
-    image: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1600&q=85',
+    image: 'https://flojmgyiopjuesgpqpup.supabase.co/storage/v1/object/public/website/defaults/computer_diagnosis.jpeg',
     techDetails: {
       protocols: ['ISO 15765-4 (CAN)', 'KWP2000', 'DoIP / Ethernet', 'UDS'],
       turnaround: '45 - 90 Minutes',
@@ -34,7 +34,7 @@ export const INITIAL_SERVICES: ServiceItem[] = [
       'Speed limiter removal & throttle map sharpening',
       'Transmission TCU shift speed & torque limit optimization'
     ],
-    image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=85',
+    image: 'https://flojmgyiopjuesgpqpup.supabase.co/storage/v1/object/public/website/defaults/service-ecu.jpg',
     techDetails: {
       protocols: ['OBD2 Flash', 'Bench TriCore Boot', 'BDM / JTAG', 'Flex Magic'],
       turnaround: '2 - 4 Hours',
@@ -55,7 +55,7 @@ export const INITIAL_SERVICES: ServiceItem[] = [
       'Wire harness repair & OEM waterproof pinning',
       'BCM, SAM & fuse box micro-soldering component restoration'
     ],
-    image: 'https://images.unsplash.com/photo-1486006920555-c77dce18193b?auto=format&fit=crop&w=1600&q=85',
+    image: 'https://flojmgyiopjuesgpqpup.supabase.co/storage/v1/object/public/website/defaults/automotive_electrical.jpeg',
     techDetails: {
       protocols: ['LIN Bus', 'CAN High/Low', 'FlexRay', 'PWM Analysis'],
       turnaround: 'Same Day / 24 Hours',
@@ -76,7 +76,7 @@ export const INITIAL_SERVICES: ServiceItem[] = [
       'Toyota/Lexus H-Chip & G-Chip smart key coding',
       'Keyless-Go & comfort access synchronization'
     ],
-    image: 'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=1600&q=85',
+    image: 'https://flojmgyiopjuesgpqpup.supabase.co/storage/v1/object/public/website/defaults/service-keys.jpg',
     techDetails: {
       protocols: ['RFID 125kHz / 134.2kHz', 'Hitag-Pro', 'Megamos Crypto', 'DST-AES'],
       turnaround: '30 - 60 Minutes',
@@ -97,7 +97,7 @@ export const INITIAL_SERVICES: ServiceItem[] = [
       'Differential pressure sensor re-initialization',
       'EGR valve carbon decoking & reset'
     ],
-    image: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=1600&q=85',
+    image: 'https://flojmgyiopjuesgpqpup.supabase.co/storage/v1/object/public/website/defaults/service-dpf.jpg',
     techDetails: {
       protocols: ['DPF Dynamic Regen Mode', 'Differential Pressure Delta-P Log'],
       turnaround: '2 - 3 Hours',
@@ -118,7 +118,7 @@ export const INITIAL_SERVICES: ServiceItem[] = [
       'Suspension geometry & bushing torque spec inspection',
       'Multi-point digital inspection report with photo documentation'
     ],
-    image: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?auto=format&fit=crop&w=1600&q=85',
+    image: 'https://flojmgyiopjuesgpqpup.supabase.co/storage/v1/object/public/website/defaults/service-maintenance.jpg',
     techDetails: {
       protocols: ['50-Point Digital Vehicle Health Checklist', 'Torque Angle Verification'],
       turnaround: '1.5 - 3 Hours',
@@ -450,7 +450,7 @@ export const INITIAL_LIVE_SENSORS: DiagnosticSensor[] = [
   { id: 'dpf_soot', name: 'DPF Soot Mass Load', value: 14.8, unit: 'g', min: 0, max: 60, status: 'nominal' }
 ];
 
-export const DEFAULT_HERO_BG = 'https://images.unsplash.com/photo-1613214149922-f1809c99b414?auto=format&fit=crop&w=2000&q=85';
+export const DEFAULT_HERO_BG = 'https://flojmgyiopjuesgpqpup.supabase.co/storage/v1/object/public/website/defaults/dm_wallpaper2.jpg';
 
 export interface HeroBgPreset {
   id: string;
