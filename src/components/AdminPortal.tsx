@@ -576,7 +576,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 {mechanics.map((m) => (
                   <div key={m.id} className="p-5 rounded-2xl bg-zinc-900/50 border border-white/10 flex gap-4">
                     <img
-                      src={m.avatar}
+                      src={m.avatar ?? undefined}
                       alt={m.name}
                       className="w-16 h-16 rounded-xl object-cover border border-white/10"
                     />
