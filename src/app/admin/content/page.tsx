@@ -313,6 +313,30 @@ function ServicesEditor({ onSaved }: { onSaved: () => void }) {
       .finally(() => setLoading(false))
   }, [])
 
+  const addService = () => {
+    const nextNum = services.length + 1
+    const newSvc: ServiceData = {
+      id: `svc-${Date.now()}`,
+      numberCode: String(nextNum).padStart(2, '0'),
+      title: '',
+      tagline: '',
+      description: '',
+      features: [''],
+      image: '',
+      turnaround: '',
+      accuracyRate: '',
+      equipmentUsed: '',
+      category: '',
+    }
+    setServices(prev => [...prev, newSvc])
+    setExpandedId(newSvc.id)
+  }
+
+  const removeService = (id: string) => {
+    setServices(prev => prev.filter(s => s.id !== id))
+    if (expandedId === id) setExpandedId(null)
+  }
+
   const updateService = (id: string, field: keyof ServiceData, val: string | string[]) => {
     setServices(prev => prev.map(s => s.id === id ? { ...s, [field]: val } : s))
   }
@@ -369,6 +393,17 @@ function ServicesEditor({ onSaved }: { onSaved: () => void }) {
 
   return (
     <div className="space-y-3">
+      {/* Header with Add button */}
+      <div className="flex items-center justify-between px-1">
+        <p className="text-xs text-zinc-500 font-mono">{services.length} service{services.length !== 1 ? 's' : ''}</p>
+        <button
+          onClick={addService}
+          className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-semibold rounded-xl transition-all shadow-[0_0_16px_rgba(220,38,38,0.3)]"
+        >
+          <Plus className="w-3.5 h-3.5" /> Add Service
+        </button>
+      </div>
+
       <AnimatePresence>
         {success && <Toast message={success} type="success" onDismiss={() => setSuccess('')} />}
         {error   && <Toast message={error}   type="error"   onDismiss={() => setError('')}   />}
@@ -412,6 +447,13 @@ function ServicesEditor({ onSaved }: { onSaved: () => void }) {
                 <span className="text-[10px] text-zinc-600 font-mono px-2 py-1 bg-white/[0.03] rounded-lg border border-white/5">
                   {svc.category}
                 </span>
+                <button
+                  onClick={e => { e.stopPropagation(); removeService(svc.id) }}
+                  className="p-1.5 rounded-lg hover:bg-red-500/20 text-red-500/40 hover:text-red-400 transition-colors"
+                  title="Delete service"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
                 {isOpen ? <ChevronUp className="w-4 h-4 text-zinc-500" /> : <ChevronDown className="w-4 h-4 text-zinc-500" />}
               </div>
             </button>
