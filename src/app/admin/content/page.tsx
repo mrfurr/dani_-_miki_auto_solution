@@ -420,9 +420,9 @@ function ServicesEditor({ onSaved }: { onSaved: () => void }) {
             className="bg-[#0d0d14] border border-white/[0.06] rounded-2xl overflow-hidden"
           >
             {/* Service card header */}
-            <button
+            <div
               onClick={() => setExpandedId(isOpen ? null : svc.id)}
-              className="w-full flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-colors"
+              className="w-full flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-colors cursor-pointer"
             >
               {/* Preview image */}
               <div className="w-16 h-12 rounded-lg overflow-hidden border border-white/8 flex-shrink-0 bg-zinc-900">
@@ -456,7 +456,7 @@ function ServicesEditor({ onSaved }: { onSaved: () => void }) {
                 </button>
                 {isOpen ? <ChevronUp className="w-4 h-4 text-zinc-500" /> : <ChevronDown className="w-4 h-4 text-zinc-500" />}
               </div>
-            </button>
+            </div>
 
             {/* Expanded editor */}
             <AnimatePresence initial={false}>
