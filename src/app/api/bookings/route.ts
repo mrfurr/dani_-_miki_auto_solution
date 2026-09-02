@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
         vehicleModel: validatedData.vehicleModel ?? undefined,
         vehicleYear: validatedData.vehicleYear ?? undefined,
         plateNumber: validatedData.plateNumber ?? undefined,
-        packageId: validatedData.packageId || null,
+        ...(validatedData.packageId ? { packageId: validatedData.packageId } : {}),
         date: validatedData.date,
         time: validatedData.time,
         notes: validatedData.notes ?? undefined,
@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
         status: 'PENDING_VERIFICATION'
       },
       include: {
-        package: true,
+        package: !!validatedData.packageId,
         branch: true
       }
     })
