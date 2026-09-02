@@ -41,10 +41,20 @@ function getSocialIcon(platform: string) {
 }
 
 interface SocialLink { id: string; platform: string; url: string; isActive: boolean }
+interface Branch { id: string; name: string; address: string; phone: string | null; mapUrl: string | null }
 
 interface ContactSectionProps {
   onOpenBooking: () => void;
   content?: Record<string, string>;
+}
+
+// Convert a Google Maps share URL to an embeddable iframe src
+function toEmbedUrl(mapUrl: string, address: string): string {
+  // If it's already an embed URL, return as-is
+  if (mapUrl.includes('/maps/embed') || mapUrl.includes('output=embed')) return mapUrl
+  // Build embed URL from the address as query
+  const query = encodeURIComponent(address)
+  return `https://maps.google.com/maps?q=${query}&output=embed&hl=en`
 }
 
 export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking, content = {} }) => {
@@ -52,10 +62,17 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking, c
 
   // Social links from DB
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+  // Branches from DB
+  const [branches, setBranches] = useState<Branch[]>([]);
+
   useEffect(() => {
     fetch('/api/social')
       .then(r => r.ok ? r.json() : { links: [] })
       .then(d => setSocialLinks(d.links || []))
+      .catch(() => {});
+    fetch('/api/branches')
+      .then(r => r.ok ? r.json() : { branches: [] })
+      .then(d => setBranches(d.branches || []))
       .catch(() => {});
   }, []);
 
@@ -209,25 +226,64 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking, c
               </div>
             )}
 
-            {/* Map placeholder */}
-            <div className="rounded-2xl overflow-hidden border border-white/10 h-48 bg-zinc-900/40 flex items-center justify-center">
-              <div className="text-center space-y-2">
-                <MapPin size={28} className="text-red-500/60 mx-auto" />
-                <p className="text-xs font-mono text-zinc-500 uppercase">
-                  {c('address_title', 'Workshop Location')}
-                </p>
-                <a
-                  href={`https://maps.google.com/?q=${encodeURIComponent(
-                    c('address_title', '') + ' ' + c('address_body', '').split('·')[0].trim()
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-red-400 hover:text-red-300 font-mono underline transition-colors"
-                >
-                  OPEN IN GOOGLE MAPS →
-                </a>
+            {/* Branch Maps — one per branch, full-height iframe */}
+            {branches.length > 0 ? (
+              <div className="space-y-4">
+                {branches.map(branch => (
+                  <div key={branch.id} className="rounded-2xl overflow-hidden border border-white/10">
+                    {/* Branch label */}
+                    <div className="flex items-center gap-3 px-4 py-3 bg-zinc-900/60 border-b border-white/5">
+                      <MapPin size={14} className="text-red-400 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-white truncate">{branch.name}</p>
+                        <p className="text-xs font-mono text-zinc-500 truncate">{branch.address}</p>
+                      </div>
+                      <a
+                        href={branch.mapUrl || `https://maps.google.com/?q=${encodeURIComponent(branch.address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[10px] font-mono text-red-400 hover:text-red-300 transition-colors whitespace-nowrap flex-shrink-0"
+                      >
+                        OPEN MAP →
+                      </a>
+                    </div>
+                    {/* Embedded map */}
+                    <div className="relative w-full h-56">
+                      <iframe
+                        src={toEmbedUrl(branch.mapUrl || '', branch.address)}
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0, display: 'block' }}
+                        allowFullScreen
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title={`Map — ${branch.name}`}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
+            ) : (
+              /* Fallback when no branches configured */
+              <div className="rounded-2xl overflow-hidden border border-white/10 h-56 bg-zinc-900/40 flex items-center justify-center">
+                <div className="text-center space-y-2">
+                  <MapPin size={28} className="text-red-500/60 mx-auto" />
+                  <p className="text-xs font-mono text-zinc-500 uppercase">
+                    {c('address_title', 'Workshop Location')}
+                  </p>
+                  <a
+                    href={`https://maps.google.com/?q=${encodeURIComponent(
+                      c('address_title', '') + ' ' + c('address_body', '').split('·')[0].trim()
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-red-400 hover:text-red-300 font-mono underline transition-colors"
+                  >
+                    OPEN IN GOOGLE MAPS →
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── Right: Message form ── */}
