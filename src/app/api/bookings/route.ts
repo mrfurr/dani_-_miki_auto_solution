@@ -180,10 +180,10 @@ export async function POST(request: NextRequest) {
         branchId: validatedData.branchId ?? null,
         status: 'PENDING_VERIFICATION'
       },
-      include: {
-        package: !!validatedData.packageId,
-        branch: true
-      }
+      ...(validatedData.packageId
+        ? { include: { package: true, branch: true } }
+        : { include: { branch: true } }
+      )
     })
 
     return NextResponse.json({
