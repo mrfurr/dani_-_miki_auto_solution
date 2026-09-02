@@ -329,7 +329,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const [email, setEmail] = useState('');
   const [vehicleMake, setVehicleMake] = useState('');
   const [vehicleModel, setVehicleModel] = useState('');
-  const [vehicleYear, setVehicleYear] = useState('2021');
+  const [vehicleYear, setVehicleYear] = useState('');
   const [plateNumber, setPlateNumber] = useState('');
 
   const [selectedServiceId, setSelectedServiceId] = useState<string>('');
