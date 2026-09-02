@@ -68,7 +68,8 @@ function ReviewModal({
     sounds.playClick();
     if (rating === 0)              { setError('Please select a star rating.');    return; }
     if (name.trim().length < 2)    { setError('Please enter your full name.');    return; }
-    if (!email.includes('@'))      { setError('Please enter a valid email.');     return; }
+    if (!phone.trim() || phone.trim().length < 7) { setError('Please enter a valid phone number.'); return; }
+    if (email.trim() && !email.includes('@')) { setError('Please enter a valid email address or leave it blank.'); return; }
     if (reviewText.trim().length < 10) { setError('Review must be at least 10 characters.'); return; }
 
     setSubmitting(true); setError('');
@@ -79,8 +80,8 @@ function ReviewModal({
         body: JSON.stringify({
           mechanicId: mechanic.id,
           customer:   name.trim(),
-          email:      email.trim(),
-          phone:      phone.trim() || undefined,
+          email:      email.trim() || undefined,
+          phone:      phone.trim(),
           rating,
           reviewText: reviewText.trim(),
         }),
@@ -166,16 +167,16 @@ function ReviewModal({
               </div>
               <div className="relative">
                 <Phone size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600" />
-                <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="Phone (opt.)"
-                  className="w-full bg-[#0a0a10] border border-white/8 rounded-xl pl-8 pr-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-red-500/50 focus:ring-2 focus:ring-red-500/10 transition-all" />
+                <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="Phone Number *"
+                  className="w-full bg-[#0a0a10] border border-white/8 rounded-xl pl-8 pr-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-red-500/50 focus:ring-2 focus:ring-red-500/10 transition-all" required />
               </div>
             </div>
 
-            {/* Email */}
+            {/* Email (optional) */}
             <div className="relative">
               <Mail size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600" />
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email Address *"
-                className="w-full bg-[#0a0a10] border border-white/8 rounded-xl pl-8 pr-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-red-500/50 focus:ring-2 focus:ring-red-500/10 transition-all" required />
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email Address (optional)"
+                className="w-full bg-[#0a0a10] border border-white/8 rounded-xl pl-8 pr-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-red-500/50 focus:ring-2 focus:ring-red-500/10 transition-all" />
             </div>
 
             {/* Review text */}

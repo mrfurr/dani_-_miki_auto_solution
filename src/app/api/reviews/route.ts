@@ -28,7 +28,7 @@ const reviewSchema = z.object({
   mechanicId: z.string().uuid('Invalid mechanic ID'),
   customer:   z.string().min(2, 'Name must be at least 2 characters'),
   email:      z.string().email('Invalid email').optional().or(z.literal('')),
-  phone:      z.string().optional(),
+  phone:      z.string().min(7, 'Phone number is required'),
   rating:     z.number().int().min(1).max(5),
   reviewText: z.string().min(10, 'Review must be at least 10 characters').max(1000),
 })
