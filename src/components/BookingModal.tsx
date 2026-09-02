@@ -1069,9 +1069,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     <div className="font-display font-black text-2xl text-white">
                       {computedDeposit} <span className="text-xs font-mono text-red-400">ETB</span>
                     </div>
-                    {depositType === 'percentage' && selectedPkg && (
+                    {depositType === 'percentage' && selectedPkgObj && (
                       <div className="text-[10px] font-mono text-zinc-500 mt-0.5">
-                        {depositValue}% of {selectedPkg.priceEtb.toLocaleString()} ETB
+                        {depositValue}% of {selectedPkgObj.priceEtb.toLocaleString()} ETB
                       </div>
                     )}
                   </div>
