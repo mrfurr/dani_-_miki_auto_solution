@@ -73,7 +73,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking, c
     sounds.playClick();
 
     if (!name.trim() || name.trim().length < 2) { setFormErr('Please enter your full name.'); return; }
-    if (!email.trim() || !email.includes('@')) { setFormErr('Please enter a valid email address.'); return; }
+    if (!phone.trim() || phone.trim().length < 7) { setFormErr('Please enter a valid phone number.'); return; }
+    if (email.trim() && !email.includes('@')) { setFormErr('Please enter a valid email address or leave it blank.'); return; }
     if (!message.trim() || message.trim().length < 10) { setFormErr('Message must be at least 10 characters.'); return; }
 
     setSending(true); setFormErr('');
@@ -263,22 +264,22 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking, c
                       type="tel"
                       value={phone}
                       onChange={e => setPhone(e.target.value)}
-                      placeholder="Phone (optional)"
+                      placeholder="Phone Number *"
                       className={`${inputClass} pl-10`}
+                      required
                     />
                   </div>
                 </div>
 
-                {/* Email */}
+                {/* Email (optional) */}
                 <div className="relative">
                   <Mail size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-600 pointer-events-none" />
                   <input
                     type="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    placeholder="Email Address *"
+                    placeholder="Email Address (optional)"
                     className={`${inputClass} pl-10`}
-                    required
                   />
                 </div>
 

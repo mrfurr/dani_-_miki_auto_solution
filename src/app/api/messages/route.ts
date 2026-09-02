@@ -4,8 +4,8 @@ import { z } from 'zod'
 
 const messageSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
-  phone: z.string().optional(),
-  email: z.string().email('Invalid email address'),
+  phone: z.string().min(7, 'Phone number is required'),
+  email: z.string().email('Invalid email address').optional().or(z.literal('')),
   message: z.string().min(10, 'Message must be at least 10 characters')
 })
 
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       data: {
         name: validatedData.name,
         phone: validatedData.phone,
-        email: validatedData.email,
+        email: validatedData.email || '',
         message: validatedData.message
       }
     })
