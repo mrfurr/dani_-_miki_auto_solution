@@ -261,7 +261,6 @@ export default function App() {
       <Footer
         onNavigateSection={handleNavigateSection}
         onOpenBooking={() => handleOpenBooking()}
-        onOpenAdmin={() => window.location.href = '/admin/login'}
         content={siteContent['footer']}
         logoUrl={logoUrl}
       />

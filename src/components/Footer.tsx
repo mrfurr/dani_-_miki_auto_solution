@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrandLogo } from './BrandLogo';
 import { sounds } from '../utils/audio';
-import { Activity, ArrowUp, Lock, Facebook, Instagram, Youtube, Twitter, Linkedin, ExternalLink } from 'lucide-react';
+import { Activity, ArrowUp, Facebook, Instagram, Youtube, Twitter, Linkedin, ExternalLink } from 'lucide-react';
 
 // Inline SVG icons for platforms not in lucide
 const TelegramIcon = () => (
@@ -38,12 +38,11 @@ interface SocialLink { id: string; platform: string; url: string; isActive: bool
 interface FooterProps {
   onNavigateSection: (sectionId: string) => void;
   onOpenBooking: () => void;
-  onOpenAdmin: () => void;
   content?: Record<string, string>;
   logoUrl?: string;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onNavigateSection, onOpenBooking, onOpenAdmin, content = {}, logoUrl }) => {
+export const Footer: React.FC<FooterProps> = ({ onNavigateSection, onOpenBooking, content = {}, logoUrl }) => {
   const c = (key: string, fb: string) => content[key] || fb;
   const scrollToTop = () => { sounds.playClick(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
@@ -165,9 +164,6 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateSection, onOpenBooking
         <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs text-zinc-500">
           <div suppressHydrationWarning>© {new Date().getFullYear()} {c('copyright', 'DANI & MIKI AUTO SOLUTION. ALL RIGHTS RESERVED.')}</div>
           <div className="flex items-center gap-6">
-            <button onClick={() => { sounds.playClick(); onOpenAdmin(); }} className="flex items-center gap-1.5 text-zinc-600 hover:text-zinc-300 transition-colors" title="Admin Portal">
-              <Lock size={12} /><span>ADMIN ACCESS</span>
-            </button>
             <button onClick={scrollToTop} className="flex items-center gap-1.5 text-zinc-400 hover:text-red-400 transition-colors">
               <span>BACK TO TOP</span><ArrowUp size={13} />
             </button>
