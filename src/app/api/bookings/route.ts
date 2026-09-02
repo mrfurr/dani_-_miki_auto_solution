@@ -14,7 +14,7 @@ const bookingSchema = z.object({
   vehicleModel: z.string().nullish(),
   vehicleYear: z.string().nullish(),
   plateNumber: z.string().nullish(),
-  packageId: z.string().uuid('Invalid package ID'),
+  packageId: z.string().uuid('Invalid package ID').optional().or(z.literal('')),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
   time: z.string().regex(/^\d{2}:\d{2}$/, 'Invalid time format'),
   notes: z.string().nullish(),
@@ -60,16 +60,17 @@ export async function POST(request: NextRequest) {
     // Validate booking data
     const validatedData = bookingSchema.parse(bookingData)
 
-    // Verify package exists and is active
-    const pkg = await prisma.package.findUnique({
-      where: { id: validatedData.packageId }
-    })
-
-    if (!pkg || !pkg.isActive) {
-      return NextResponse.json(
-        { error: 'Invalid or inactive package' },
-        { status: 400 }
-      )
+    // Verify package exists and is active (skip for custom problems)
+    if (validatedData.packageId) {
+      const pkg = await prisma.package.findUnique({
+        where: { id: validatedData.packageId }
+      })
+      if (!pkg || !pkg.isActive) {
+        return NextResponse.json(
+          { error: 'Invalid or inactive package' },
+          { status: 400 }
+        )
+      }
     }
 
     // Check booking limit for the time group
@@ -168,7 +169,7 @@ export async function POST(request: NextRequest) {
         vehicleModel: validatedData.vehicleModel ?? undefined,
         vehicleYear: validatedData.vehicleYear ?? undefined,
         plateNumber: validatedData.plateNumber ?? undefined,
-        packageId: validatedData.packageId,
+        packageId: validatedData.packageId || null,
         date: validatedData.date,
         time: validatedData.time,
         notes: validatedData.notes ?? undefined,
@@ -192,7 +193,7 @@ export async function POST(request: NextRequest) {
         internalId: booking.internalId,
         customerName: booking.customerName,
         customerEmail: booking.customerEmail,
-        serviceName: (booking as any).package?.name ?? pkg.name,
+        serviceName: (booking as any).package?.name ?? 'Custom Problem',
         date: booking.date,
         time: booking.time,
         status: booking.status,

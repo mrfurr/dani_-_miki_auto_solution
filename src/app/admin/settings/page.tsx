@@ -186,6 +186,7 @@ export default function AdminSettingsPage() {
   const [depositType,    setDepositType]    = useState('fixed')
   const [depositAmount,  setDepositAmount]  = useState('200')
   const [maxBookingDays, setMaxBookingDays] = useState('30')
+  const [customProblemDeposit, setCustomProblemDeposit] = useState('200')
   const [savingBooking,  setSavingBooking]  = useState(false)
 
   // Branding
@@ -216,6 +217,7 @@ export default function AdminSettingsPage() {
           setDepositType(d.settings.deposit_type ?? 'fixed')
           setDepositAmount(d.settings.deposit_amount ?? '200')
           setMaxBookingDays(d.settings.max_booking_days ?? '30')
+          setCustomProblemDeposit(d.settings.custom_problem_deposit ?? '200')
           setGarageName(d.settings.garage_name ?? 'Dani & Miki Auto Solution')
           setGarageTagline(d.settings.garage_tagline ?? '')
           setLogoUrl(d.settings.logo_url ?? '')
@@ -233,7 +235,7 @@ export default function AdminSettingsPage() {
     setSavingBooking(true)
     try {
       const r = await fetch('/api/admin/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ settings: { deposit_type: depositType, deposit_amount: depositAmount, max_booking_days: maxBookingDays } }) })
+        body: JSON.stringify({ settings: { deposit_type: depositType, deposit_amount: depositAmount, max_booking_days: maxBookingDays, custom_problem_deposit: customProblemDeposit } }) })
       r.ok ? notify('Booking settings saved', 'success') : notify('Save failed', 'error')
     } finally { setSavingBooking(false) }
   }
@@ -357,6 +359,13 @@ export default function AdminSettingsPage() {
                         <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-zinc-500 font-mono pointer-events-none">days</span>
                       </div>
                       <InfoBox text="Set to 30 for a rolling one-month window. The booking calendar will block dates beyond this limit." />
+                    </Field>
+                    <Field label="Custom Problem Deposit" hint="Fixed ETB deposit for customers who book with a custom/unlisted problem description.">
+                      <div className="relative">
+                        <TextInput value={customProblemDeposit} onChange={setCustomProblemDeposit} type="number" placeholder="200" />
+                        <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-zinc-500 font-mono pointer-events-none">ETB</span>
+                      </div>
+                      <InfoBox text="Applied when a customer selects 'Custom Problem' instead of a standard service package." />
                     </Field>
                   </div>
                   <div className="px-6 py-4 bg-white/[0.02] border-t border-white/[0.04] flex items-center justify-end gap-3">

@@ -34,8 +34,8 @@ model Booking {
   notes               String?
   
   // Service / Package
-  packageId           String
-  package             Package  @relation(fields: [packageId], references: [id])
+  packageId           String?
+  package             Package?  @relation(fields: [packageId], references: [id])
   
   // Schedule
   date                String   // Format: YYYY-MM-DD

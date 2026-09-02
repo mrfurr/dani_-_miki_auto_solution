@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 
 // Public endpoint — returns non-sensitive site settings for the frontend
 // Only exposes specific safe keys (no admin credentials)
-const PUBLIC_KEYS = ['garage_name', 'garage_tagline', 'logo_url', 'deposit_type', 'deposit_amount', 'max_booking_days']
+const PUBLIC_KEYS = ['garage_name', 'garage_tagline', 'logo_url', 'deposit_type', 'deposit_amount', 'max_booking_days', 'custom_problem_deposit']
 
 export async function GET() {
   try {

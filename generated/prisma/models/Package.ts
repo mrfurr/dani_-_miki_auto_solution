@@ -442,9 +442,9 @@ export type PackageUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type PackageScalarRelationFilter = {
-  is?: Prisma.PackageWhereInput
-  isNot?: Prisma.PackageWhereInput
+export type PackageNullableScalarRelationFilter = {
+  is?: Prisma.PackageWhereInput | null
+  isNot?: Prisma.PackageWhereInput | null
 }
 
 export type StringNullableListFilter<$PrismaModel = never> = {
@@ -513,10 +513,12 @@ export type PackageCreateNestedOneWithoutBookingsInput = {
   connect?: Prisma.PackageWhereUniqueInput
 }
 
-export type PackageUpdateOneRequiredWithoutBookingsNestedInput = {
+export type PackageUpdateOneWithoutBookingsNestedInput = {
   create?: Prisma.XOR<Prisma.PackageCreateWithoutBookingsInput, Prisma.PackageUncheckedCreateWithoutBookingsInput>
   connectOrCreate?: Prisma.PackageCreateOrConnectWithoutBookingsInput
   upsert?: Prisma.PackageUpsertWithoutBookingsInput
+  disconnect?: Prisma.PackageWhereInput | boolean
+  delete?: Prisma.PackageWhereInput | boolean
   connect?: Prisma.PackageWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.PackageUpdateToOneWithWhereWithoutBookingsInput, Prisma.PackageUpdateWithoutBookingsInput>, Prisma.PackageUncheckedUpdateWithoutBookingsInput>
 }

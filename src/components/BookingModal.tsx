@@ -333,6 +333,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const [plateNumber, setPlateNumber] = useState('');
 
   const [selectedServiceId, setSelectedServiceId] = useState<string>('');
+  const [isCustomProblem, setIsCustomProblem] = useState(false);
+  const [customProblemText, setCustomProblemText] = useState('');
   const [preferredDate, setPreferredDate] = useState<string>('');
   const [availableTimeSlots, setAvailableTimeSlots] = useState<Array<{label:string;start:string;end:string;groupLabel:string}>>([]);
   const [preferredTime, setPreferredTime] = useState<string>('');    // HH:mm (24h)
@@ -345,6 +347,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const [paymentRefNumber, setPaymentRefNumber] = useState('');
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
   const [maxBookingDays, setMaxBookingDays] = useState(30); // from admin settings
+  const [customProblemDeposit, setCustomProblemDeposit] = useState(200); // from admin settings
   const [timeClassifications, setTimeClassifications] = useState<any[]>([]);
 
   // Deposit settings from admin
@@ -366,6 +369,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         setDepositType(dtype === 'percentage' ? 'percentage' : 'fixed');
         const dval = parseFloat(d.settings?.deposit_amount || '200');
         if (!isNaN(dval) && dval > 0) setDepositValue(dval);
+        const cpd = parseFloat(d.settings?.custom_problem_deposit || '200');
+        if (!isNaN(cpd) && cpd > 0) setCustomProblemDeposit(cpd);
       })
       .catch(() => {});
 
@@ -474,6 +479,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
   // Compute the actual deposit for the selected package
   const calcDeposit = (pkg: typeof packages[0] | undefined): number => {
+    if (isCustomProblem) return customProblemDeposit;
     if (!pkg) return depositType === 'fixed' ? depositValue : 200;
     if (depositType === 'percentage') {
       return Math.round(pkg.priceEtb * depositValue / 100);
@@ -510,8 +516,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       }
     }
     if (currentStep === 2) {
-      if (!selectedServiceId) {
-        setSubmitError('Please select a service or package.');
+      if (!isCustomProblem && !selectedServiceId) {
+        setSubmitError('Please select a service or describe your problem.');
+        return;
+      }
+      if (isCustomProblem && customProblemText.trim().length < 5) {
+        setSubmitError('Please describe your problem (at least 5 characters).');
         return;
       }
     }
@@ -561,10 +571,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       formData.append('vehicleModel', vehicleModel);
       formData.append('vehicleYear', vehicleYear);
       formData.append('plateNumber', plateNumber);
-      formData.append('packageId', selectedServiceId);
+      formData.append('packageId', isCustomProblem ? '' : selectedServiceId);
       formData.append('date', preferredDate);
       formData.append('time', preferredTime); // already HH:mm 24h format
-      formData.append('notes', notes);
+      formData.append('notes', isCustomProblem ? `[CUSTOM PROBLEM] ${customProblemText}` : notes);
       formData.append('depositAmount', depositAmount.toString());
       formData.append('depositMethod', paymentMethod);
       formData.append('transactionRef', paymentRefNumber || 'N/A');
@@ -866,6 +876,59 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     onChange={(e) => setNotes(e.target.value)}
                     className="w-full bg-zinc-900/80 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500 transition-colors"
                   />
+                </div>
+
+                {/* Custom Problem Option */}
+                <div className="pt-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="flex-1 h-px bg-white/5" />
+                    <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider">or</span>
+                    <div className="flex-1 h-px bg-white/5" />
+                  </div>
+                  <div
+                    onClick={() => {
+                      sounds.playClick();
+                      setIsCustomProblem(!isCustomProblem);
+                      if (!isCustomProblem) setSelectedServiceId('');
+                    }}
+                    className={`p-4 rounded-xl border transition-all cursor-pointer ${
+                      isCustomProblem
+                        ? 'bg-orange-950/40 border-orange-500/60 shadow-[0_0_15px_rgba(249,115,22,0.2)]'
+                        : 'bg-zinc-900/60 hover:bg-zinc-900 border-white/5 text-zinc-300'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <div className="font-display font-bold text-sm text-white flex items-center gap-2">
+                          <span>Custom Problem</span>
+                          <span className="text-[10px] font-mono text-orange-400 px-1.5 py-0.5 bg-orange-500/10 rounded-full border border-orange-500/20">Not listed above?</span>
+                        </div>
+                        <div className="text-xs text-zinc-400 mt-0.5">
+                          Deposit: {customProblemDeposit} ETB · Fixed
+                        </div>
+                      </div>
+                      <span className={`text-[10px] font-mono uppercase flex-shrink-0 mt-0.5 ${isCustomProblem ? 'text-orange-400 font-bold' : 'text-zinc-500'}`}>
+                        {isCustomProblem ? 'SELECTED ✓' : 'CHOOSE'}
+                      </span>
+                    </div>
+
+                    {/* Text area expands when selected */}
+                    {isCustomProblem && (
+                      <div className="mt-3" onClick={e => e.stopPropagation()}>
+                        <textarea
+                          rows={3}
+                          autoFocus
+                          placeholder="Describe your vehicle problem in detail — symptoms, warning lights, unusual sounds…"
+                          value={customProblemText}
+                          onChange={e => setCustomProblemText(e.target.value)}
+                          className="w-full bg-zinc-900/80 border border-orange-500/30 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-orange-400/60 transition-colors resize-none"
+                        />
+                        <p className="text-[10px] text-zinc-500 font-mono mt-1">
+                          Our technician will assess and provide a quote on arrival.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             )}
