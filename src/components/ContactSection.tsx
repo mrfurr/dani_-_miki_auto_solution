@@ -226,60 +226,68 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking, c
               </div>
             )}
 
-            {/* Branch Maps — one per branch, full-height iframe */}
+            {/* Branch Maps — frameless modern design */}
             {branches.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-5">
                 {branches.map(branch => (
-                  <div key={branch.id} className="rounded-2xl overflow-hidden border border-white/10">
-                    {/* Branch label */}
-                    <div className="flex items-center gap-3 px-4 py-3 bg-zinc-900/60 border-b border-white/5">
-                      <MapPin size={14} className="text-red-400 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-white truncate">{branch.name}</p>
-                        <p className="text-xs font-mono text-zinc-500 truncate">{branch.address}</p>
-                      </div>
-                      <a
-                        href={branch.mapUrl || `https://maps.google.com/?q=${encodeURIComponent(branch.address)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[10px] font-mono text-red-400 hover:text-red-300 transition-colors whitespace-nowrap flex-shrink-0"
-                      >
-                        OPEN MAP →
-                      </a>
-                    </div>
-                    {/* Embedded map */}
-                    <div className="relative w-full h-56">
+                  <div key={branch.id} className="relative group">
+                    {/* Map iframe — frameless, full bleed with rounded corners */}
+                    <div className="relative w-full h-64 rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
                       <iframe
                         src={toEmbedUrl(branch.mapUrl || '', branch.address)}
                         width="100%"
                         height="100%"
-                        style={{ border: 0, display: 'block' }}
+                        style={{ border: 0, display: 'block', filter: 'contrast(1.05) saturate(1.1)' }}
                         allowFullScreen
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
                         title={`Map — ${branch.name}`}
                       />
+                      {/* Dark vignette overlay — top and bottom */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none rounded-3xl" />
+                      {/* Bottom info bar — floating over map */}
+                      <div className="absolute bottom-0 left-0 right-0 px-4 py-3 flex items-end justify-between pointer-events-none">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-xl bg-red-600 shadow-[0_0_16px_rgba(220,38,38,0.6)] flex items-center justify-center flex-shrink-0">
+                            <MapPin size={14} className="text-white" />
+                          </div>
+                          <div>
+                            <p className="text-white text-sm font-bold leading-tight drop-shadow">{branch.name}</p>
+                            <p className="text-white/60 text-[10px] font-mono leading-tight">{branch.address}</p>
+                          </div>
+                        </div>
+                        <a
+                          href={branch.mapUrl || `https://maps.google.com/?q=${encodeURIComponent(branch.address)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-mono font-bold uppercase tracking-wider hover:bg-white/20 transition-all"
+                        >
+                          <ExternalLink size={10} />
+                          Directions
+                        </a>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               /* Fallback when no branches configured */
-              <div className="rounded-2xl overflow-hidden border border-white/10 h-56 bg-zinc-900/40 flex items-center justify-center">
-                <div className="text-center space-y-2">
-                  <MapPin size={28} className="text-red-500/60 mx-auto" />
-                  <p className="text-xs font-mono text-zinc-500 uppercase">
-                    {c('address_title', 'Workshop Location')}
-                  </p>
+              <div className="relative w-full h-64 rounded-3xl overflow-hidden bg-zinc-900/60 flex items-center justify-center shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
+                <div className="text-center space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-red-600/20 border border-red-500/30 flex items-center justify-center mx-auto">
+                    <MapPin size={22} className="text-red-400" />
+                  </div>
+                  <p className="text-sm font-bold text-white">{c('address_title', 'Workshop Location')}</p>
                   <a
                     href={`https://maps.google.com/?q=${encodeURIComponent(
                       c('address_title', '') + ' ' + c('address_body', '').split('·')[0].trim()
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-red-400 hover:text-red-300 font-mono underline transition-colors"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600/20 border border-red-500/30 text-red-400 hover:text-red-300 text-xs font-mono font-bold uppercase tracking-wider transition-all"
                   >
-                    OPEN IN GOOGLE MAPS →
+                    <ExternalLink size={11} />
+                    Open in Google Maps
                   </a>
                 </div>
               </div>
