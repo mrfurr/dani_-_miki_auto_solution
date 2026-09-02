@@ -42,36 +42,37 @@ export default function AdminDashboard() {
   const router = useRouter()
   const [stats, setStats] = useState<Stats | null>(null)
   const [bookings, setBookings] = useState<any[]>([])
+  const [trendData, setTrendData] = useState<{day:string;v:number}[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => { fetchData() }, [])
 
   const fetchData = async () => {
     try {
-      const [sRes, bRes] = await Promise.all([
+      const [sRes, bRes, tRes] = await Promise.all([
         fetch('/api/admin/dashboard/stats'),
-        fetch('/api/bookings')
+        fetch('/api/bookings'),
+        fetch('/api/admin/dashboard/trend'),
       ])
       if (sRes.ok) setStats(await sRes.json())
       if (bRes.ok) {
         const d = await bRes.json()
         setBookings((d.bookings || []).slice(0, 6))
       }
+      if (tRes.ok) {
+        const d = await tRes.json()
+        setTrendData(d.trend || [])
+      }
     } finally { setLoading(false) }
   }
 
-  // Build pie data
+  // Build pie data from real stats
   const pieData = stats ? [
     { name: 'Pending',    value: stats.pendingVerification },
     { name: 'Approved',   value: stats.approved },
     { name: 'Checked In', value: stats.checkedIn },
     { name: 'Completed',  value: stats.completed },
   ].filter(d => d.value > 0) : []
-
-  // Fake trend sparkline (last 7 days)
-  const trendData = [2,5,3,8,6,10,stats?.todayBookings ?? 0].map((v, i) => ({
-    day: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i], v
-  }))
 
   if (loading) return <Spinner />
 
