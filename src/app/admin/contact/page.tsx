@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { Plus, Pencil, Trash2, MapPin, Globe, HelpCircle } from 'lucide-react'
-import { PageHeader, PrimaryButton, GhostButton, Card, Badge, Modal, Spinner, EmptyState, Toast, Input, Textarea } from '@/components/admin/AdminUI'
+import { Plus, Pencil, Trash2, MapPin, Globe } from 'lucide-react'
+import { PageHeader, PrimaryButton, GhostButton, Card, Badge, Modal, Spinner, EmptyState, Toast, Input } from '@/components/admin/AdminUI'
 
-type Tab = 'branches'|'social'|'faqs'
-const TABS = [{ id:'branches' as Tab, label:'Branches', icon:MapPin }, { id:'social' as Tab, label:'Social Media', icon:Globe }, { id:'faqs' as Tab, label:'FAQs', icon:HelpCircle }]
+type Tab = 'branches'|'social'
+const TABS = [{ id:'branches' as Tab, label:'Branches', icon:MapPin }, { id:'social' as Tab, label:'Social Media', icon:Globe }]
 
 export default function AdminContactPage() {
   const [tab, setTab] = useState<Tab>('branches')
-  const [data, setData] = useState<{branches:any[];social:any[];faqs:any[]}>({ branches:[], social:[], faqs:[] })
+  const [data, setData] = useState<{branches:any[];social:any[]}>({ branches:[], social:[] })
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editId, setEditId] = useState<string|null>(null)
@@ -24,25 +24,23 @@ export default function AdminContactPage() {
   const load = async () => {
     setLoading(true)
     try {
-      const [b,s,f] = await Promise.all([
+      const [b,s] = await Promise.all([
         fetch('/api/admin/contact/branches').then(r=>r.json()),
         fetch('/api/admin/contact/social').then(r=>r.json()),
-        fetch('/api/admin/contact/faqs').then(r=>r.json()),
       ])
-      setData({ branches:b.branches||[], social:s.links||[], faqs:f.faqs||[] })
+      setData({ branches:b.branches||[], social:s.links||[] })
     } finally { setLoading(false) }
   }
 
   const defaults: Record<Tab,any> = {
     branches: { name:'', address:'', phone:'', mapUrl:'', isActive:true },
     social:   { platform:'', url:'', isActive:true },
-    faqs:     { question:'', answer:'', order: (data.faqs.length||0)+1, isActive:true },
   }
 
   const openAdd = () => { setForm(defaults[tab]); setEditId(null); setShowForm(true); setError('') }
   const openEdit = (item:any) => { setForm({...item}); setEditId(item.id); setShowForm(true); setError('') }
 
-  const urls: Record<Tab,string> = { branches:'/api/admin/contact/branches', social:'/api/admin/contact/social', faqs:'/api/admin/contact/faqs' }
+  const urls: Record<Tab,string> = { branches:'/api/admin/contact/branches', social:'/api/admin/contact/social' }
 
   const save = async () => {
     setSaving(true); setError('')
@@ -60,11 +58,11 @@ export default function AdminContactPage() {
     setSuccess('Deleted'); load(); setTimeout(()=>setSuccess(''),3000)
   }
 
-  const items = tab==='branches' ? data.branches : tab==='social' ? data.social : data.faqs
+  const items = tab==='branches' ? data.branches : data.social
 
   return (
     <div className="space-y-5 max-w-4xl">
-      <PageHeader title="Contact" subtitle="Branches, social media links, and FAQ management" />
+      <PageHeader title="Contact" subtitle="Branches and social media links management" />
 
       <AnimatePresence>
         {success && <Toast message={success} type="success" onDismiss={()=>setSuccess('')} />}
@@ -110,11 +108,10 @@ export default function AdminContactPage() {
                       }</span>
                     )
                   })()}
-                  {tab==='faqs' && <HelpCircle className="w-4 h-4 text-emerald-400" />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-white text-sm truncate">{tab==='branches'?item.name:tab==='social'?item.platform:item.question}</p>
-                  <p className="text-zinc-500 text-xs truncate mt-0.5">{tab==='branches'?item.address:tab==='social'?item.url:item.answer}</p>
+                <p className="font-semibold text-white text-sm truncate">{tab==='branches'?item.name:item.platform}</p>
+                  <p className="text-zinc-500 text-xs truncate mt-0.5">{tab==='branches'?item.address:item.url}</p>
                 </div>
                 {item.isActive ? <Badge color="green">Active</Badge> : <Badge color="zinc">Inactive</Badge>}
                 <div className="flex gap-1.5 flex-shrink-0">
@@ -162,7 +159,6 @@ export default function AdminContactPage() {
                       )
                     })}
                   </div>
-                  {/* Custom platform fallback */}
                   <input
                     value={form.platform||''}
                     onChange={e=>setForm((f:any)=>({...f,platform:e.target.value}))}
@@ -171,11 +167,6 @@ export default function AdminContactPage() {
                   />
                 </div>
                 <Input label="Profile / Page URL" value={form.url||''} onChange={v=>setForm((f:any)=>({...f,url:v}))} placeholder="https://facebook.com/danimikiauto" required />
-              </>}
-              {tab==='faqs' && <>
-                <Input label="Question" value={form.question||''} onChange={v=>setForm((f:any)=>({...f,question:v}))} placeholder="What types of vehicles…?" required />
-                <Textarea label="Answer" value={form.answer||''} onChange={v=>setForm((f:any)=>({...f,answer:v}))} placeholder="We specialize in…" required />
-                <Input label="Display Order" value={String(form.order||1)} onChange={v=>setForm((f:any)=>({...f,order:parseInt(v)||1}))} type="number" />
               </>}
               <label className="flex items-center gap-2.5 cursor-pointer">
                 <input type="checkbox" checked={form.isActive} onChange={e=>setForm((f:any)=>({...f,isActive:e.target.checked}))} className="w-4 h-4 rounded accent-red-600" />
