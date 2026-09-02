@@ -7,12 +7,24 @@ import { Check, Zap, Sparkles, Clock, ShieldCheck, ArrowRight } from 'lucide-rea
 interface PackagesSectionProps {
   packages: ServicePackage[];
   onSelectPackage: (packageId: string) => void;
+  depositType?: 'fixed' | 'percentage';
+  depositValue?: number;
 }
 
 export const PackagesSection: React.FC<PackagesSectionProps> = ({
   packages,
   onSelectPackage,
+  depositType = 'fixed',
+  depositValue = 200,
 }) => {
+  const calcDeposit = (pkg: ServicePackage) => {
+    if (depositType === 'percentage') return Math.round(pkg.priceEtb * depositValue / 100);
+    return depositValue;
+  };
+
+  const depositSubtitle = depositType === 'percentage'
+    ? `${depositValue}% deposit required to secure your booking. No hidden diagnostic fees or unexpected surcharges.`
+    : `Clear, all-inclusive pricing with fixed deposit protection (${depositValue} ETB). No hidden diagnostic fees or unexpected surcharges.`;
   return (
     <section id="packages" className="relative py-28 sm:py-36 bg-[#08080b] border-t border-zinc-900 overflow-hidden">
       {/* Background Ambience */}
@@ -30,7 +42,7 @@ export const PackagesSection: React.FC<PackagesSectionProps> = ({
             SERVICE <span className="text-red-500">TIERS</span>
           </h2>
           <p className="text-zinc-400 text-sm sm:text-base mt-3">
-            Clear, all-inclusive pricing with fixed deposit protection (200 ETB). No hidden diagnostic fees or unexpected surcharges.
+            {depositSubtitle}
           </p>
         </div>
 
@@ -85,7 +97,7 @@ export const PackagesSection: React.FC<PackagesSectionProps> = ({
                     <div className="text-right">
                       <div className="text-[10px] font-mono text-zinc-400 uppercase">Deposit</div>
                       <div className="font-mono font-bold text-sm text-emerald-400">
-                        {pkg.depositEtb} ETB
+                        {calcDeposit(pkg)} ETB{depositType === 'percentage' ? ` (${depositValue}%)` : ''}
                       </div>
                     </div>
                   </div>

@@ -32,6 +32,8 @@ export default function App() {
   const [packages, setPackages] = useState<ServicePackage[]>([]);
   const [mechanics, setMechanics] = useState<Mechanic[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [depositType, setDepositType] = useState<'fixed'|'percentage'>('fixed');
+  const [depositValue, setDepositValue] = useState<number>(200);
 
   useEffect(() => {
     fetchWebsiteData();
@@ -109,6 +111,11 @@ export default function App() {
         if (settingsData.settings?.logo_url) {
           setLogoUrl(settingsData.settings.logo_url);
         }
+        // Read deposit settings
+        const dtype = settingsData.settings?.deposit_type || 'fixed';
+        setDepositType(dtype === 'percentage' ? 'percentage' : 'fixed');
+        const dval = parseFloat(settingsData.settings?.deposit_amount || '200');
+        if (!isNaN(dval) && dval > 0) setDepositValue(dval);
       } catch { /* keep empty logo */ }
 
       // ── Packages ──
@@ -239,6 +246,8 @@ export default function App() {
         <PackagesSection
           packages={packages}
           onSelectPackage={(id) => handleOpenBooking(id)}
+          depositType={depositType}
+          depositValue={depositValue}
         />
 
         {/* Contact */}

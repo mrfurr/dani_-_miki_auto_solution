@@ -347,6 +347,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const [maxBookingDays, setMaxBookingDays] = useState(30); // from admin settings
   const [timeClassifications, setTimeClassifications] = useState<any[]>([]);
 
+  // Deposit settings from admin
+  const [depositType, setDepositType] = useState<'fixed' | 'percentage'>('fixed');
+  const [depositValue, setDepositValue] = useState<number>(200); // ETB if fixed, % if percentage
+
   // Branch selection
   const [branches, setBranches] = useState<Array<{id:string;name:string;address:string;phone:string|null;mapUrl:string|null}>>([]);
   const [selectedBranchId, setSelectedBranchId] = useState<string>('');
@@ -358,6 +362,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       .then(d => {
         const days = parseInt(d.settings?.max_booking_days || '30');
         if (!isNaN(days) && days > 0) setMaxBookingDays(days);
+        const dtype = d.settings?.deposit_type || 'fixed';
+        setDepositType(dtype === 'percentage' ? 'percentage' : 'fixed');
+        const dval = parseFloat(d.settings?.deposit_amount || '200');
+        if (!isNaN(dval) && dval > 0) setDepositValue(dval);
       })
       .catch(() => {});
 
@@ -464,6 +472,18 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
   if (!isOpen) return null;
 
+  // Compute the actual deposit for the selected package
+  const calcDeposit = (pkg: typeof packages[0] | undefined): number => {
+    if (!pkg) return depositType === 'fixed' ? depositValue : 200;
+    if (depositType === 'percentage') {
+      return Math.round(pkg.priceEtb * depositValue / 100);
+    }
+    return depositValue; // fixed
+  };
+
+  const selectedPkgObj = packages.find(p => p.id === selectedServiceId);
+  const computedDeposit = calcDeposit(selectedPkgObj);
+
   const handleCopy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     sounds.playClick();
@@ -531,7 +551,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
     try {
       const selectedPkg = packages.find(p => p.id === selectedServiceId);
-      const depositAmount = selectedPkg?.depositEtb || 200;
+      const depositAmount = calcDeposit(selectedPkg);
 
       const formData = new FormData();
       formData.append('customerName', customerName);
@@ -818,7 +838,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                             {pkg.name}
                           </div>
                           <div className="text-xs text-zinc-400 mt-0.5">
-                            {pkg.duration} · Deposit: 200 ETB
+                          {pkg.duration} · Deposit: {depositType === 'percentage' ? `${depositValue}% (${Math.round(pkg.priceEtb * depositValue / 100)} ETB)` : `${pkg.depositEtb || depositValue} ETB`}
                           </div>
                         </div>
 
@@ -1043,10 +1063,17 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 {/* Deposit Highlight Banner */}
                 <div className="p-4 rounded-2xl bg-gradient-to-r from-red-950/70 to-zinc-900 border border-red-500/40 flex items-center justify-between">
                   <div>
-                    <div className="text-[10px] font-mono text-red-300 uppercase">Fixed Reservation Deposit</div>
-                    <div className="font-display font-black text-2xl text-white">
-                      200 <span className="text-xs font-mono text-red-400">ETB</span>
+                    <div className="text-[10px] font-mono text-red-300 uppercase">
+                      {depositType === 'percentage' ? `${depositValue}% Service Deposit` : 'Fixed Reservation Deposit'}
                     </div>
+                    <div className="font-display font-black text-2xl text-white">
+                      {computedDeposit} <span className="text-xs font-mono text-red-400">ETB</span>
+                    </div>
+                    {depositType === 'percentage' && selectedPkg && (
+                      <div className="text-[10px] font-mono text-zinc-500 mt-0.5">
+                        {depositValue}% of {selectedPkg.priceEtb.toLocaleString()} ETB
+                      </div>
+                    )}
                   </div>
                   <div className="text-xs font-mono text-zinc-300 text-right max-w-xs">
                     Deducted from your total invoice at the workshop.
@@ -1192,7 +1219,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   )}
                   <div className="flex items-center justify-between">
                     <span className="text-zinc-500 uppercase">DEPOSIT SUBMITTED:</span>
-                    <span className="text-emerald-400 font-bold">200 ETB via {paymentMethod}</span>
+                    <span className="text-emerald-400 font-bold">{computedDeposit} ETB via {paymentMethod}</span>
                   </div>
                 </div>
 
