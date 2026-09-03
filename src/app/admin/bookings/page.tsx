@@ -12,7 +12,7 @@ interface Booking {
   id: string; internalId: number; bookingCode: string | null
   customerName: string; customerPhone: string; customerEmail: string
   vehicleMake: string | null; vehicleModel: string | null; vehicleYear: string | null; plateNumber: string | null
-  package: { name: string; price: number | null }
+  package: { name: string; price: number | null } | null
   branch: { name: string; address: string } | null
   date: string; time: string; depositAmount: number; depositMethod: string; transactionRef: string
   paymentScreenshot: string | null; status: string; createdAt: string
@@ -131,7 +131,7 @@ export default function AdminBookingsPage() {
                   <p className="font-semibold text-white text-sm">{b.customerName}</p>
                   <p className="text-zinc-500 text-xs">{b.customerPhone}</p>
                 </TD>
-                <TD><p className="text-zinc-300 text-sm max-w-[180px] truncate">{b.package.name}</p></TD>
+                <TD><p className="text-zinc-300 text-sm max-w-[180px] truncate">{b.package?.name ?? 'Custom Problem'}</p></TD>
                 <TD>
                   <p className="text-zinc-300 text-xs font-mono">{b.date}</p>
                   <p className="text-zinc-500 text-xs">{b.time}</p>
@@ -190,7 +190,7 @@ export default function AdminBookingsPage() {
                   ['Email', selected.customerEmail],
                   ['Date', selected.date],
                   ['Time', selected.time],
-                  ['Service', selected.package.name],
+                  ['Service', selected.package?.name ?? 'Custom Problem'],
                   ...(selected.branch ? [['Branch', `${selected.branch.name} · ${selected.branch.address}`]] : []),
                   ['Deposit', `${selected.depositAmount} ETB`],
                   ['Method', selected.depositMethod],
