@@ -198,8 +198,12 @@ export default function AdminBookingsPage() {
                   ['Ref #', selected.transactionRef],
                   ...(selected.vehicleMake ? [['Vehicle', `${selected.vehicleMake} ${selected.vehicleModel || ''} ${selected.vehicleYear || ''}`.trim()]] : []),
                   ...(selected.plateNumber ? [['VIN', selected.plateNumber]] : []),
+                  ...(selected.notes && !selected.notes.startsWith('[CUSTOM PROBLEM]') ? [['Notes', selected.notes]] : []),
                 ].map(([k,v]) => (
-                  <div key={k as string}><span className="text-zinc-500 text-xs uppercase tracking-wider">{k}</span><p className="text-white font-medium mt-0.5">{v}</p></div>
+                  <div key={k as string} className={k === 'Notes' ? 'col-span-2' : ''}>
+                    <span className="text-zinc-500 text-xs uppercase tracking-wider">{k}</span>
+                    <p className="text-white font-medium mt-0.5">{v}</p>
+                  </div>
                 ))}
               </div>
               {selected.rejectionReason && <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4"><p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Rejection Reason</p><p className="text-red-400 text-sm">{selected.rejectionReason}</p></div>}
@@ -215,13 +219,7 @@ export default function AdminBookingsPage() {
                 </div>
               )}
 
-              {/* Regular notes (non-custom) */}
-              {selected.notes && !selected.notes.startsWith('[CUSTOM PROBLEM]') && (
-                <div className="bg-zinc-900/50 border border-white/5 rounded-xl p-4">
-                  <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Customer Notes</p>
-                  <p className="text-zinc-300 text-sm leading-relaxed">{selected.notes}</p>
-                </div>
-              )}
+              {/* Regular notes handled in info grid above */}
 
               {/* Payment Screenshot */}
               {selected.paymentScreenshot && (
