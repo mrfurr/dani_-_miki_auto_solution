@@ -14,6 +14,7 @@ interface Booking {
   vehicleMake: string | null; vehicleModel: string | null; vehicleYear: string | null; plateNumber: string | null
   package: { name: string; price: number | null } | null
   branch: { name: string; address: string } | null
+  notes: string | null
   date: string; time: string; depositAmount: number; depositMethod: string; transactionRef: string
   paymentScreenshot: string | null; status: string; createdAt: string
   approvedAt: string | null; checkedInAt: string | null; completedAt: string | null; rejectionReason: string | null
@@ -131,7 +132,7 @@ export default function AdminBookingsPage() {
                   <p className="font-semibold text-white text-sm">{b.customerName}</p>
                   <p className="text-zinc-500 text-xs">{b.customerPhone}</p>
                 </TD>
-                <TD><p className="text-zinc-300 text-sm max-w-[180px] truncate">{b.package?.name ?? 'Custom Problem'}</p></TD>
+                <TD><p className="text-zinc-300 text-sm max-w-[180px] truncate">{b.package?.name ?? <span className="text-orange-400 font-semibold">Custom Problem</span>}</p></TD>
                 <TD>
                   <p className="text-zinc-300 text-xs font-mono">{b.date}</p>
                   <p className="text-zinc-500 text-xs">{b.time}</p>
@@ -202,6 +203,25 @@ export default function AdminBookingsPage() {
                 ))}
               </div>
               {selected.rejectionReason && <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4"><p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Rejection Reason</p><p className="text-red-400 text-sm">{selected.rejectionReason}</p></div>}
+
+              {/* Custom Problem description — shown prominently */}
+              {selected.notes?.startsWith('[CUSTOM PROBLEM]') && (
+                <div className="bg-orange-500/10 border border-orange-500/25 rounded-xl p-4">
+                  <p className="text-xs text-orange-400 uppercase tracking-wider font-bold mb-1.5 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400" />
+                    Customer's Custom Problem Description
+                  </p>
+                  <p className="text-zinc-200 text-sm leading-relaxed">{selected.notes.replace('[CUSTOM PROBLEM] ', '')}</p>
+                </div>
+              )}
+
+              {/* Regular notes (non-custom) */}
+              {selected.notes && !selected.notes.startsWith('[CUSTOM PROBLEM]') && (
+                <div className="bg-zinc-900/50 border border-white/5 rounded-xl p-4">
+                  <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Customer Notes</p>
+                  <p className="text-zinc-300 text-sm leading-relaxed">{selected.notes}</p>
+                </div>
+              )}
 
               {/* Payment Screenshot */}
               {selected.paymentScreenshot && (
